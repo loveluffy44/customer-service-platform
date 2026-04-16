@@ -2341,18 +2341,8 @@
                   <input type="text" class="filter-input" placeholder="输入商户名称">
                 </div>
                 <div class="filter-item">
-                  <span class="filter-label">投诉渠道</span>
-                  <select class="filter-select">
-                    <option value="">全部渠道</option>
-                    <option value="alipay-official">支付宝官方投诉</option>
-                    <option value="alipay-mini">支付宝小程序投诉</option>
-                    <option value="wechat-official">微信官方投诉</option>
-                    <option value="app-refund">App内申请退款</option>
-                    <option value="400-phone">400电话退款</option>
-                    <option value="online-service">在线客服留言</option>
-                    <option value="feedback">后台用户意见反馈</option>
-                    <option value="regulatory">监管投诉</option>
-                  </select>
+                  <span class="filter-label">应用名称</span>
+                  <input type="text" class="filter-input" placeholder="输入应用名称">
                 </div>
                 <div class="filter-item">
                   <span class="filter-label">投诉状态</span>
@@ -2404,7 +2394,6 @@
                       <th class="sortable" data-sort="id">投诉单号</th>
                       <th class="sortable" data-sort="app">应用名称</th>
                       <th class="sortable" data-sort="merchant">商户名称</th>
-                      <th class="sortable" data-sort="channel">投诉渠道</th>
                       <th class="sortable" data-sort="orders">关联订单数</th>
                       <th class="sortable" data-sort="status">投诉状态</th>
                       <th class="sortable" data-sort="amount">投诉金额</th>
@@ -2424,7 +2413,6 @@
                     <td><span class="pinned-icon">📌</span><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308005</a></td>
                     <td>XX出行</td>
                     <td>杭州CC网络科技有限公司</td>
-                    <td>支付宝官方投诉</td>
                     <td>3</td>
                     <td><span class="status-tag status-pending">待处理</span></td>
                     <td>¥1,299.00</td>
@@ -2443,7 +2431,6 @@
                     <td><span class="pinned-icon">📌</span><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308006</a></td>
                     <td>XX出行</td>
                     <td>南京DD科技有限公司</td>
-                    <td>微信官方投诉</td>
                     <td>2</td>
                     <td><span class="status-tag status-pending">待处理</span></td>
                     <td>¥899.00</td>
@@ -2463,7 +2450,6 @@
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308001</a></td>
                     <td>XX出行</td>
                     <td>北京XX科技有限公司</td>
-                    <td>支付宝官方投诉</td>
                     <td>2</td>
                     <td><span class="status-tag status-pending">待处理</span></td>
                     <td>¥299.00</td>
@@ -2482,7 +2468,6 @@
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308002</a></td>
                     <td>XX出行</td>
                     <td>上海YY网络科技有限公司</td>
-                    <td>微信官方投诉</td>
                     <td>1</td>
                     <td><span class="status-tag status-processing">处理中</span></td>
                     <td>¥159.00</td>
@@ -2501,7 +2486,6 @@
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308003</a></td>
                     <td>XX出行</td>
                     <td>广州ZZ出行服务有限公司</td>
-                    <td>支付宝小程序投诉</td>
                     <td>1</td>
                     <td><span class="status-tag status-processing">处理中</span></td>
                     <td>¥599.00</td>
@@ -2520,7 +2504,6 @@
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307004</a></td>
                     <td>XX出行</td>
                     <td>深圳AA科技有限公司</td>
-                    <td>App内申请退款</td>
                     <td>1</td>
                     <td><span class="status-tag status-success">处理完成</span></td>
                     <td>¥89.00</td>
@@ -2539,7 +2522,6 @@
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307005</a></td>
                     <td>XX出行</td>
                     <td>杭州BB信息技术有限公司</td>
-                    <td>400电话退款</td>
                     <td>2</td>
                     <td><span class="status-tag status-withdrawn">用户撤诉</span></td>
                     <td>¥399.00</td>
@@ -2558,7 +2540,6 @@
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307006</a></td>
                     <td>XX出行</td>
                     <td>成都CC出行服务有限公司</td>
-                    <td>在线客服留言</td>
                     <td>1</td>
                     <td><span class="status-tag status-pending">待处理</span></td>
                     <td>¥128.00</td>
@@ -2577,7 +2558,6 @@
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307007</a></td>
                     <td>XX出行</td>
                     <td>武汉DD网络科技有限公司</td>
-                    <td>后台用户意见反馈</td>
                     <td>1</td>
                     <td><span class="status-tag status-processing">处理中</span></td>
                     <td>¥256.00</td>
@@ -2596,7 +2576,6 @@
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240306008</a></td>
                     <td>XX出行</td>
                     <td>南京EE出行服务有限公司</td>
-                    <td>监管投诉</td>
                     <td>1</td>
                     <td><span class="status-tag status-success">处理完成</span></td>
                     <td>¥588.00</td>
