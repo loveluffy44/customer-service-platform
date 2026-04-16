@@ -748,12 +748,14 @@
       white-space: nowrap;
       border-bottom: 1px solid var(--gray-200);
     }
-    
+
     .data-table th {
       font-weight: 600;
       color: var(--gray-600);
       background: var(--gray-50);
       border-bottom: 2px solid var(--gray-200);
+      white-space: normal;
+      line-height: 1.4;
     }
     
     .data-table thead {
@@ -1925,6 +1927,10 @@
         <!-- 第二模块：售后处理 -->
         <div class="nav-section">
           <div class="nav-section-title">售后处理</div>
+          <div class="nav-item" onclick="showPage('order-query')">
+            <span class="nav-item-icon">🔍</span>
+            <span>订单/用户查询</span>
+          </div>
           <div class="nav-item active" onclick="showPage('complaint-list')">
             <span class="nav-item-icon">📋</span>
             <span>投诉处理</span>
@@ -1937,9 +1943,9 @@
             <span class="nav-item-icon">⚡</span>
             <span>自动退款表</span>
           </div>
-          <div class="nav-item" onclick="showPage('order-query')">
-            <span class="nav-item-icon">🔍</span>
-            <span>订单/用户查询</span>
+          <div class="nav-item" onclick="showPage('retention-submit')">
+            <span class="nav-item-icon">📝</span>
+            <span>挽留提交表</span>
           </div>
           <div class="nav-item" onclick="showPage('retention-audit')">
             <span class="nav-item-icon">📋</span>
@@ -1976,7 +1982,7 @@
             🔔
             <span class="notification-badge">3</span>
           </button>
-          <div class="user-menu">
+          <div class="user-menu" onclick="showPage('agent-profile')" style="cursor: pointer;">
             <div class="user-avatar">李</div>
             <span>李客服</span>
           </div>
@@ -1996,35 +2002,21 @@
                 <span>账号管理</span>
               </div>
               <div class="card-actions">
-                <button class="btn btn-primary" onclick="openModal('create-account')">➕ 新建账号</button>
+                <button class="btn btn-primary" onclick="openModal('create-account-modal')">➕ 新建账号</button>
               </div>
             </div>
             <div class="card-body">
               <!-- 筛选栏 -->
               <div class="filter-bar">
                 <div class="filter-item">
-                  <span class="filter-label">账号</span>
-                  <input type="text" class="filter-input" placeholder="输入账号">
-                </div>
-                <div class="filter-item">
-                  <span class="filter-label">姓名</span>
-                  <input type="text" class="filter-input" placeholder="输入姓名">
-                </div>
-                <div class="filter-item">
-                  <span class="filter-label">角色</span>
-                  <select class="filter-select">
-                    <option value="">全部角色</option>
-                    <option value="admin">系统管理员</option>
-                    <option value="supervisor">客服主管</option>
-                    <option value="cs">客服专员</option>
-                    <option value="finance">财务专员</option>
-                  </select>
+                  <span class="filter-label">用户名/昵称</span>
+                  <input type="text" class="filter-input" placeholder="输入用户名或昵称模糊搜索">
                 </div>
                 <div class="filter-item">
                   <span class="filter-label">状态</span>
                   <select class="filter-select">
                     <option value="">全部</option>
-                    <option value="active">启用</option>
+                    <option value="active">活跃</option>
                     <option value="inactive">禁用</option>
                   </select>
                 </div>
@@ -2034,90 +2026,113 @@
                 </div>
               </div>
               
+              <!-- 批量操作栏 -->
+              <div class="batch-actions" style="margin-bottom: 16px; padding: 12px 16px; background: var(--gray-50); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; color: var(--gray-600);">
+                  <input type="checkbox" id="selectAllAccounts" style="cursor: pointer;">
+                  <span>全选</span>
+                </label>
+                <span style="color: var(--gray-400);">|</span>
+                <span style="font-size: 14px; color: var(--gray-500);">已选 <strong id="selectedCount" style="color: var(--primary);">0</strong> 项</span>
+                <button class="btn" style="padding: 6px 12px; font-size: 13px;" onclick="batchDisableAccounts()">批量禁用</button>
+                <button class="btn" style="padding: 6px 12px; font-size: 13px; background: var(--danger-light); color: var(--danger);" onclick="batchDeleteAccounts()">批量删除</button>
+              </div>
+              
               <!-- 账号列表表格 -->
-              <table class="data-table">
+              <table class="data-table" id="accountTable">
                 <thead>
                   <tr>
-                    <th>账号ID</th>
-                    <th>账号</th>
-                    <th>姓名</th>
-                    <th>角色</th>
-                    <th>部门</th>
-                    <th>手机号</th>
-                    <th>最后登录时间</th>
+                    <th style="width: 40px;"><input type="checkbox" id="selectAllHeader"></th>
+                    <th>ID</th>
+                    <th>用户名</th>
+                    <th>昵称</th>
                     <th>状态</th>
+                    <th>角色</th>
+                    <th>关联400席位</th>
+                    <th>所属客服分组</th>
+                    <th>修改时间</th>
                     <th>操作</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
+                    <td><input type="checkbox" class="account-checkbox" data-id="A001"></td>
                     <td><span class="table-id">A001</span></td>
                     <td>admin</td>
                     <td>系统管理员</td>
+                    <td><span class="status-tag status-success">活跃</span></td>
                     <td><span class="type-tag" style="background: var(--danger-light); color: var(--danger);">系统管理员</span></td>
-                    <td>技术部</td>
-                    <td>138****0001</td>
-                    <td>2024-03-08 10:30</td>
-                    <td><span class="status-tag status-success">启用</span></td>
+                    <td>400-001</td>
+                    <td><span class="type-tag" style="background: #E6F7FF; color: #1890FF;">分组A</span></td>
+                    <td>2024-03-08 10:30:25</td>
                     <td>
-                      <button class="action-btn">编辑</button>
-                      <button class="action-btn" style="background: var(--danger); color: white;">禁用</button>
+                      <button class="action-btn" onclick="openEditAccountModal('A001', 'admin', '系统管理员', 'admin', 'active', '400-001', 'A')">编辑</button>
+                      <button class="action-btn" style="background: var(--warning); color: white;" onclick="disableAccount('A001')">禁用</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteAccount('A001', 'admin')">删除</button>
                     </td>
                   </tr>
                   <tr>
+                    <td><input type="checkbox" class="account-checkbox" data-id="A002"></td>
                     <td><span class="table-id">A002</span></td>
                     <td>supervisor01</td>
                     <td>张主管</td>
+                    <td><span class="status-tag status-success">活跃</span></td>
                     <td><span class="type-tag" style="background: var(--primary-light); color: var(--primary);">客服主管</span></td>
-                    <td>客服部</td>
-                    <td>139****0002</td>
-                    <td>2024-03-08 09:15</td>
-                    <td><span class="status-tag status-success">启用</span></td>
+                    <td>400-002</td>
+                    <td><span class="type-tag" style="background: #F6FFED; color: #52C41A;">分组B</span></td>
+                    <td>2024-03-08 09:15:18</td>
                     <td>
-                      <button class="action-btn">编辑</button>
-                      <button class="action-btn" style="background: var(--danger); color: white;">禁用</button>
+                      <button class="action-btn" onclick="openEditAccountModal('A002', 'supervisor01', '客服主管', 'supervisor', 'active', '400-002', 'B')">编辑</button>
+                      <button class="action-btn" style="background: var(--warning); color: white;" onclick="disableAccount('A002')">禁用</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteAccount('A002', 'supervisor01')">删除</button>
                     </td>
                   </tr>
                   <tr>
+                    <td><input type="checkbox" class="account-checkbox" data-id="A003"></td>
                     <td><span class="table-id">A003</span></td>
                     <td>cs001</td>
                     <td>李客服</td>
+                    <td><span class="status-tag status-success">活跃</span></td>
                     <td><span class="type-tag type-refund">客服专员</span></td>
-                    <td>客服部</td>
-                    <td>137****0003</td>
-                    <td>2024-03-08 08:00</td>
-                    <td><span class="status-tag status-success">启用</span></td>
+                    <td>400-003</td>
+                    <td><span class="type-tag" style="background: #E6F7FF; color: #1890FF;">分组A</span></td>
+                    <td>2024-03-08 08:00:42</td>
                     <td>
-                      <button class="action-btn">编辑</button>
-                      <button class="action-btn" style="background: var(--danger); color: white;">禁用</button>
+                      <button class="action-btn" onclick="openEditAccountModal('A003', 'cs001', '客服专员1', 'cs', 'active', '', 'A')">编辑</button>
+                      <button class="action-btn" style="background: var(--warning); color: white;" onclick="disableAccount('A003')">禁用</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteAccount('A003', 'cs001')">删除</button>
                     </td>
                   </tr>
                   <tr>
+                    <td><input type="checkbox" class="account-checkbox" data-id="A004"></td>
                     <td><span class="table-id">A004</span></td>
                     <td>finance01</td>
                     <td>王财务</td>
+                    <td><span class="status-tag status-success">活跃</span></td>
                     <td><span class="type-tag" style="background: var(--warning-light); color: var(--warning);">财务专员</span></td>
-                    <td>财务部</td>
-                    <td>136****0004</td>
-                    <td>2024-03-07 16:45</td>
-                    <td><span class="status-tag status-success">启用</span></td>
+                    <td>400-004</td>
+                    <td><span class="type-tag" style="background: #F6FFED; color: #52C41A;">分组B</span></td>
+                    <td>2024-03-07 16:45:33</td>
                     <td>
-                      <button class="action-btn">编辑</button>
-                      <button class="action-btn" style="background: var(--danger); color: white;">禁用</button>
+                      <button class="action-btn" onclick="openEditAccountModal('A004', 'finance01', '财务专员', 'finance', 'active', '', 'B')">编辑</button>
+                      <button class="action-btn" style="background: var(--warning); color: white;" onclick="disableAccount('A004')">禁用</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteAccount('A004', 'finance01')">删除</button>
                     </td>
                   </tr>
                   <tr>
+                    <td><input type="checkbox" class="account-checkbox" data-id="A005"></td>
                     <td><span class="table-id">A005</span></td>
                     <td>cs002</td>
                     <td>赵客服</td>
-                    <td><span class="type-tag type-refund">客服专员</span></td>
-                    <td>客服部</td>
-                    <td>135****0005</td>
-                    <td>2024-03-06 14:20</td>
                     <td><span class="status-tag status-warning">禁用</span></td>
+                    <td><span class="type-tag type-refund">客服专员</span></td>
+                    <td>400-005</td>
+                    <td><span class="type-tag" style="background: #E6F7FF; color: #1890FF;">分组A</span></td>
+                    <td>2024-03-06 14:20:15</td>
                     <td>
-                      <button class="action-btn">编辑</button>
-                      <button class="action-btn" style="background: var(--secondary); color: white;">启用</button>
+                      <button class="action-btn" onclick="openEditAccountModal('A005', 'cs002', '客服专员2', 'cs', 'inactive', '400-003', 'A')">编辑</button>
+                      <button class="action-btn" style="background: var(--secondary); color: white;" onclick="enableAccount('A005')">启用</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteAccount('A005', 'cs002')">删除</button>
                     </td>
                   </tr>
                 </tbody>
@@ -2145,88 +2160,98 @@
                 <span>角色管理</span>
               </div>
               <div class="card-actions">
-                <button class="btn btn-primary" onclick="openModal('create-role')">➕ 新建角色</button>
+                <button class="btn btn-primary" onclick="openModal('create-role-modal')">➕ 新建角色</button>
               </div>
             </div>
             <div class="card-body">
+              <!-- 批量操作栏 -->
+              <div class="batch-actions" style="margin-bottom: 16px; padding: 12px 16px; background: var(--gray-50); border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; color: var(--gray-600);">
+                  <input type="checkbox" id="selectAllRoles" style="cursor: pointer;">
+                  <span>全选</span>
+                </label>
+                <span style="color: var(--gray-400);">|</span>
+                <span style="font-size: 14px; color: var(--gray-500);">已选 <strong id="selectedRoleCount" style="color: var(--primary);">0</strong> 项</span>
+                <button class="action-btn" style="padding: 6px 12px; font-size: 13px;" onclick="batchDeleteRoles()">批量删除</button>
+              </div>
+              
               <!-- 角色列表表格 -->
-              <table class="data-table">
+              <table class="data-table" id="roleTable">
                 <thead>
                   <tr>
-                    <th>角色ID</th>
+                    <th style="width: 40px;"><input type="checkbox" id="selectAllRoleHeader"></th>
+                    <th>ID</th>
+                    <th>名称</th>
                     <th>角色名称</th>
-                    <th>角色描述</th>
-                    <th>权限范围</th>
-                    <th>账号数</th>
                     <th>创建时间</th>
-                    <th>状态</th>
+                    <th>修改时间</th>
                     <th>操作</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
+                    <td><input type="checkbox" class="role-checkbox" data-id="R001"></td>
                     <td><span class="table-id">R001</span></td>
+                    <td>系统管理员</td>
                     <td><span class="type-tag" style="background: var(--danger-light); color: var(--danger);">系统管理员</span></td>
-                    <td>系统最高权限，可管理所有功能和账号</td>
-                    <td>全部模块</td>
-                    <td>2</td>
-                    <td>2024-01-01 00:00</td>
-                    <td><span class="status-tag status-success">启用</span></td>
+                    <td>2024-01-01 00:00:00</td>
+                    <td>2024-03-08 10:30:25</td>
                     <td>
-                      <button class="action-btn">权限配置</button>
-                      <button class="action-btn">编辑</button>
+                      <button class="action-btn" onclick="openEditRoleModal('R001', '系统管理员', '系统管理员')">编辑</button>
+                      <button class="action-btn" onclick="openModal('role-permissions')">权限</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteRole('R001', '系统管理员')">删除</button>
                     </td>
                   </tr>
                   <tr>
+                    <td><input type="checkbox" class="role-checkbox" data-id="R002"></td>
                     <td><span class="table-id">R002</span></td>
+                    <td>客服主管</td>
                     <td><span class="type-tag" style="background: var(--primary-light); color: var(--primary);">客服主管</span></td>
-                    <td>管理客服团队，可查看数据报表和处理投诉</td>
-                    <td>售后处理、数据报表</td>
-                    <td>3</td>
-                    <td>2024-01-01 00:00</td>
-                    <td><span class="status-tag status-success">启用</span></td>
+                    <td>2024-01-01 00:00:00</td>
+                    <td>2024-03-08 09:15:18</td>
                     <td>
-                      <button class="action-btn">权限配置</button>
-                      <button class="action-btn">编辑</button>
+                      <button class="action-btn" onclick="openEditRoleModal('R002', '客服主管', '客服主管')">编辑</button>
+                      <button class="action-btn" onclick="openModal('role-permissions')">权限</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteRole('R002', '客服主管')">删除</button>
                     </td>
                   </tr>
                   <tr>
+                    <td><input type="checkbox" class="role-checkbox" data-id="R003"></td>
                     <td><span class="table-id">R003</span></td>
+                    <td>客服专员</td>
                     <td><span class="type-tag type-refund">客服专员</span></td>
-                    <td>处理用户投诉和退款申请</td>
-                    <td>售后处理（仅查看/处理）</td>
-                    <td>15</td>
-                    <td>2024-01-01 00:00</td>
-                    <td><span class="status-tag status-success">启用</span></td>
+                    <td>2024-01-01 00:00:00</td>
+                    <td>2024-03-08 08:00:42</td>
                     <td>
-                      <button class="action-btn">权限配置</button>
-                      <button class="action-btn">编辑</button>
+                      <button class="action-btn" onclick="openEditRoleModal('R003', '客服专员', '客服专员')">编辑</button>
+                      <button class="action-btn" onclick="openModal('role-permissions')">权限</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteRole('R003', '客服专员')">删除</button>
                     </td>
                   </tr>
                   <tr>
+                    <td><input type="checkbox" class="role-checkbox" data-id="R004"></td>
                     <td><span class="table-id">R004</span></td>
+                    <td>财务专员</td>
                     <td><span class="type-tag" style="background: var(--warning-light); color: var(--warning);">财务专员</span></td>
-                    <td>审核和处理退款，查看财务相关报表</td>
-                    <td>退款申请、数据报表（财务）</td>
-                    <td>4</td>
-                    <td>2024-01-15 10:00</td>
-                    <td><span class="status-tag status-success">启用</span></td>
+                    <td>2024-01-15 10:00:00</td>
+                    <td>2024-03-07 16:45:33</td>
                     <td>
-                      <button class="action-btn">权限配置</button>
-                      <button class="action-btn">编辑</button>
+                      <button class="action-btn" onclick="openEditRoleModal('R004', '财务专员', '财务专员')">编辑</button>
+                      <button class="action-btn" onclick="openModal('role-permissions')">权限</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteRole('R004', '财务专员')">删除</button>
                     </td>
                   </tr>
                   <tr>
+                    <td><input type="checkbox" class="role-checkbox" data-id="R005"></td>
                     <td><span class="table-id">R005</span></td>
+                    <td>数据分析师</td>
                     <td><span class="type-tag" style="background: var(--gray-100); color: var(--gray-600);">数据分析师</span></td>
-                    <td>查看和分析数据报表，无操作权限</td>
-                    <td>数据报表（只读）</td>
-                    <td>2</td>
-                    <td>2024-02-01 09:00</td>
-                    <td><span class="status-tag status-success">启用</span></td>
+                    <td>2024-02-01 09:00:00</td>
+                    <td>2024-03-06 14:20:15</td>
                     <td>
-                      <button class="action-btn">权限配置</button>
-                      <button class="action-btn">编辑</button>
+                      <button class="action-btn" onclick="openEditRoleModal('R005', '数据分析师', '数据分析师')">编辑</button>
+                      <button class="action-btn" onclick="openModal('role-permissions')">权限</button>
+                      <button class="action-btn" style="background: var(--danger); color: white;" onclick="confirmDeleteRole('R005', '数据分析师')">删除</button>
                     </td>
                   </tr>
                 </tbody>
@@ -2250,50 +2275,38 @@
           <!-- 统计卡片 -->
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-value" style="display: flex; align-items: center; gap: 8px; font-size: 20px;">
-                <span>128</span>
+              <div class="stat-value" style="display: flex; align-items: center; gap: 8px; font-size: 20px; color: #722ED1;">
+                <span>3.2%</span>
                 <span style="font-size: 12px; color: var(--gray-500); font-weight: normal;">
-                  <span style="color: #1677FF;">支付宝68</span> / 
-                  <span style="color: #52C41A;">小程序32</span> / 
-                  <span style="color: #FA8C16;">微信28</span>
+                  <span style="color: #1677FF;">支付宝3.0%</span> / 
+                  <span style="color: #52C41A;">小程序3.5%</span> / 
+                  <span style="color: #FA8C16;">微信3.1%</span>
                 </span>
               </div>
-              <div class="stat-label">新增投诉</div>
-              <div class="stat-trend trend-up">↑ 12% 较昨日</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" style="display: flex; align-items: center; gap: 8px; font-size: 20px;">
-                <span>89</span>
-                <span style="font-size: 12px; color: var(--gray-500); font-weight: normal;">
-                  <span style="color: #1677FF;">支付宝45</span> / 
-                  <span style="color: #52C41A;">小程序24</span> / 
-                  <span style="color: #FA8C16;">微信20</span>
-                </span>
-              </div>
-              <div class="stat-label">待处理</div>
-              <div class="stat-trend trend-down">↓ 5% 较昨日</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" style="color: var(--danger);">¥45,680</div>
-              <div class="stat-label">投诉金额</div>
+              <div class="stat-label">周期扣款投诉率</div>
               <div class="stat-trend">今日累计</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" style="color: var(--secondary);">¥32,450</div>
-              <div class="stat-label">实际退款金额</div>
-              <div class="stat-trend trend-up">退款率 71%</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" style="display: flex; align-items: center; gap: 8px; font-size: 20px; color: var(--primary);">
-                <span>94.2%</span>
+              <div class="stat-value" style="display: flex; align-items: center; gap: 8px; font-size: 20px;">
+                <span>42</span>
                 <span style="font-size: 12px; color: var(--gray-500); font-weight: normal;">
-                  <span style="color: #1677FF;">支付宝95%</span> / 
-                  <span style="color: #52C41A;">小程序93%</span> / 
-                  <span style="color: #FA8C16;">微信94%</span>
+                  <span style="color: #1677FF;">支付宝22</span> / 
+                  <span style="color: #52C41A;">小程序12</span> / 
+                  <span style="color: #FA8C16;">微信8</span>
                 </span>
               </div>
-              <div class="stat-label">处理完成率</div>
-              <div class="stat-trend trend-up">↑ 3.5% 较昨日</div>
+              <div class="stat-label">周期扣款投诉数</div>
+              <div class="stat-trend trend-up">↑ 8% 较昨日</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" style="color: #13C2C2;">¥8,560</div>
+              <div class="stat-label">挽留金额</div>
+              <div class="stat-trend">今日累计</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" style="color: #FA8C16;">18.7%</div>
+              <div class="stat-label">挽留率</div>
+              <div class="stat-trend">挽留金额/投诉金额</div>
             </div>
           </div>
           
@@ -2306,9 +2319,20 @@
               </div>
               <div class="card-actions">
                 <button class="btn" onclick="exportData()">📥 导出</button>
-                <button class="btn btn-primary" onclick="openModal('order-search')">🔍 搜索订单</button>
               </div>
             </div>
+            <!-- Tab切换 -->
+            <div style="padding: 0 24px; border-bottom: 1px solid var(--gray-200);">
+              <div style="display: flex; gap: 8px;">
+                <button class="tab-btn active" data-tab="alipay" onclick="switchComplaintTab('alipay')" style="padding: 12px 20px; border: none; background: transparent; color: var(--gray-600); font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">支付宝</button>
+                <button class="tab-btn" data-tab="miniapp" onclick="switchComplaintTab('miniapp')" style="padding: 12px 20px; border: none; background: transparent; color: var(--gray-600); font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">小程序</button>
+                <button class="tab-btn" data-tab="wechat" onclick="switchComplaintTab('wechat')" style="padding: 12px 20px; border: none; background: transparent; color: var(--gray-600); font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">微信</button>
+              </div>
+            </div>
+            <style>
+              .tab-btn:hover { color: var(--primary) !important; }
+              .tab-btn.active { color: var(--primary) !important; border-bottom-color: var(--primary) !important; font-weight: 500; }
+            </style>
             <div class="card-body">
               <!-- 筛选栏 -->
               <div class="filter-bar">
@@ -2340,23 +2364,7 @@
                     <option value="withdrawn">用户撤诉</option>
                   </select>
                 </div>
-                <div class="filter-item">
-                  <span class="filter-label">退款类型</span>
-                  <select class="filter-select">
-                    <option value="">全部</option>
-                    <option value="auto">自动退款</option>
-                    <option value="manual">手动退款</option>
-                  </select>
-                </div>
-                <div class="filter-item">
-                  <span class="filter-label">退款状态</span>
-                  <select class="filter-select">
-                    <option value="">全部</option>
-                    <option value="none">未退款</option>
-                    <option value="full">全额退款</option>
-                    <option value="partial">部分退款</option>
-                  </select>
-                </div>
+
                 <div class="filter-item">
                   <span class="filter-label">用户手机号</span>
                   <input type="text" class="filter-input" placeholder="输入手机号">
@@ -2378,9 +2386,21 @@
                 <div class="loading-overlay" id="complaintTableLoading">
                   <div class="loading-spinner"></div>
                 </div>
-                <table class="data-table" id="complaintTable" style="min-width: 1400px;">
+                <style>
+                  .risk-tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+                  .risk-tag.high { background: #FFF2F0; color: #CF1322; border: 1px solid #FFCCC7; }
+                  .risk-tag.medium { background: #FFF7E6; color: #D46B08; border: 1px solid #FFD591; }
+                  .risk-tag::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+                  .risk-tag.high::before { background: #CF1322; }
+                  .risk-tag.medium::before { background: #D46B08; }
+                  .pinned-row { background: #F0F5FF !important; }
+                  .pinned-row:hover { background: #E6F0FF !important; }
+                  .pinned-icon { color: #1677FF; margin-right: 4px; }
+                </style>
+                <table class="data-table" id="complaintTable" style="min-width: 1500px;">
                   <thead>
                     <tr>
+                      <th class="sortable" data-sort="risk">风险等级</th>
                       <th class="sortable" data-sort="id">投诉单号</th>
                       <th class="sortable" data-sort="app">应用名称</th>
                       <th class="sortable" data-sort="merchant">商户名称</th>
@@ -2398,7 +2418,48 @@
                     </tr>
                   </thead>
                   <tbody>
+                  <!-- 高风险置顶工单（创建后30分钟内） -->
+                  <tr class="pinned-row">
+                    <td><span class="risk-tag high">高风险</span></td>
+                    <td><span class="pinned-icon">📌</span><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308005</a></td>
+                    <td>XX出行</td>
+                    <td>杭州CC网络科技有限公司</td>
+                    <td>支付宝官方投诉</td>
+                    <td>3</td>
+                    <td><span class="status-tag status-pending">待处理</span></td>
+                    <td>¥1,299.00</td>
+                    <td>-</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="多次投诉未解决，要求全额退款并赔偿">多次投诉未解决，要求全额退款并赔偿</td>
+                    <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13500135005</a></td>
+                    <td>13512345005</td>
+                    <td>2024-03-08 11:20</td>
+                    <td>-</td>
+                    <td>
+                      <button class="action-btn" onclick="showPage('complaint-detail')">查看详情</button>
+                    </td>
+                  </tr>
+                  <tr class="pinned-row">
+                    <td><span class="risk-tag high">高风险</span></td>
+                    <td><span class="pinned-icon">📌</span><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308006</a></td>
+                    <td>XX出行</td>
+                    <td>南京DD科技有限公司</td>
+                    <td>微信官方投诉</td>
+                    <td>2</td>
+                    <td><span class="status-tag status-pending">待处理</span></td>
+                    <td>¥899.00</td>
+                    <td>-</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="服务态度恶劣，已向监管部门投诉">服务态度恶劣，已向监管部门投诉</td>
+                    <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13400134006</a></td>
+                    <td>13412344006</td>
+                    <td>2024-03-08 11:05</td>
+                    <td>-</td>
+                    <td>
+                      <button class="action-btn" onclick="showPage('complaint-detail')">查看详情</button>
+                    </td>
+                  </tr>
+                  <!-- 中风险工单 -->
                   <tr>
+                    <td><span class="risk-tag medium">中风险</span></td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308001</a></td>
                     <td>XX出行</td>
                     <td>北京XX科技有限公司</td>
@@ -2409,7 +2470,7 @@
                     <td>-</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="未使用服务，要求全额退款">未使用服务，要求全额退款</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13800138001</a></td>
-                    <td>138****8001</td>
+                    <td>13812348001</td>
                     <td>2024-03-08 10:30</td>
                     <td>-</td>
                     <td>
@@ -2417,6 +2478,7 @@
                     </td>
                   </tr>
                   <tr>
+                    <td><span class="risk-tag medium">中风险</span></td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308002</a></td>
                     <td>XX出行</td>
                     <td>上海YY网络科技有限公司</td>
@@ -2427,7 +2489,7 @@
                     <td>-</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="司机未按时到达，要求取消订单并退款">司机未按时到达，要求取消订单并退款</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13900139002</a></td>
-                    <td>139****9002</td>
+                    <td>13912349002</td>
                     <td>2024-03-08 09:15</td>
                     <td>小李</td>
                     <td>
@@ -2435,6 +2497,7 @@
                     </td>
                   </tr>
                   <tr>
+                    <td><span class="risk-tag medium">中风险</span></td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308003</a></td>
                     <td>XX出行</td>
                     <td>广州ZZ出行服务有限公司</td>
@@ -2445,7 +2508,7 @@
                     <td>-</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="行程与订单不符，存在绕路行为">行程与订单不符，存在绕路行为</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13700137003</a></td>
-                    <td>137****7003</td>
+                    <td>13712347003</td>
                     <td>2024-03-08 08:00</td>
                     <td>小王</td>
                     <td>
@@ -2453,6 +2516,7 @@
                     </td>
                   </tr>
                   <tr>
+                    <td><span class="risk-tag medium">中风险</span></td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307004</a></td>
                     <td>XX出行</td>
                     <td>深圳AA科技有限公司</td>
@@ -2463,7 +2527,7 @@
                     <td>¥89.00</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="临时改变行程，未乘坐车辆">临时改变行程，未乘坐车辆</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13600136004</a></td>
-                    <td>136****6004</td>
+                    <td>13612346004</td>
                     <td>2024-03-07 16:45</td>
                     <td>小张</td>
                     <td>
@@ -2471,6 +2535,7 @@
                     </td>
                   </tr>
                   <tr>
+                    <td>-</td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307005</a></td>
                     <td>XX出行</td>
                     <td>杭州BB信息技术有限公司</td>
@@ -2481,7 +2546,7 @@
                     <td>¥200.00</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="已与司机协商解决，申请撤诉">已与司机协商解决，申请撤诉</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13500135005</a></td>
-                    <td>135****5005</td>
+                    <td>13512345005</td>
                     <td>2024-03-07 14:20</td>
                     <td>小陈</td>
                     <td>
@@ -2489,6 +2554,7 @@
                     </td>
                   </tr>
                   <tr>
+                    <td>-</td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307006</a></td>
                     <td>XX出行</td>
                     <td>成都CC出行服务有限公司</td>
@@ -2499,7 +2565,7 @@
                     <td>-</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="客服态度不好，要求道歉并退款">客服态度不好，要求道歉并退款</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13400134006</a></td>
-                    <td>134****4006</td>
+                    <td>13412344006</td>
                     <td>2024-03-07 11:30</td>
                     <td>-</td>
                     <td>
@@ -2507,6 +2573,7 @@
                     </td>
                   </tr>
                   <tr>
+                    <td>-</td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307007</a></td>
                     <td>XX出行</td>
                     <td>武汉DD网络科技有限公司</td>
@@ -2517,7 +2584,7 @@
                     <td>-</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="App闪退导致重复扣款">App闪退导致重复扣款</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13300133007</a></td>
-                    <td>133****3007</td>
+                    <td>13312343007</td>
                     <td>2024-03-07 09:45</td>
                     <td>小刘</td>
                     <td>
@@ -2525,6 +2592,7 @@
                     </td>
                   </tr>
                   <tr>
+                    <td>-</td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240306008</a></td>
                     <td>XX出行</td>
                     <td>南京EE出行服务有限公司</td>
@@ -2535,7 +2603,7 @@
                     <td>¥588.00</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="司机服务态度恶劣，已向12315投诉">司机服务态度恶劣，已向12315投诉</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13200132008</a></td>
-                    <td>132****2008</td>
+                    <td>13212342008</td>
                     <td>2024-03-06 15:20</td>
                     <td>小赵</td>
                     <td>
@@ -2633,6 +2701,13 @@
                   </div>
                 </div>
                 <div class="card-body">
+                  <!-- 退款检测提示 -->
+                  <div id="refund-detect-alert" style="display: none; background: #F6FFED; border: 1px solid #B7EB8F; border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 8px; color: #52C41A; font-weight: 500;">
+                      <span>✓</span>
+                      <span>检测到关联订单已完成退款，系统已自动标记为"已解决"</span>
+                    </div>
+                  </div>
                   <!-- 处理结果 -->
                   <div class="form-group">
                     <label class="form-label">处理结果 <span style="color: var(--danger);">*</span></label>
@@ -2657,6 +2732,10 @@
                   <div class="form-group">
                     <label class="form-label">沟通方式 <span style="color: var(--danger);">*</span></label>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                      <label style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid var(--primary); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--primary)'">
+                        <input type="radio" name="contact-method" value="outbound" checked style="width: 18px; height: 18px; accent-color: var(--primary);" onchange="handleContactMethodChange(this.value)">
+                        <span style="font-weight: 500;">外呼</span>
+                      </label>
                       <label style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid var(--gray-200); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--gray-200)'">
                         <input type="radio" name="contact-method" value="phone400" style="width: 18px; height: 18px; accent-color: var(--primary);" onchange="handleContactMethodChange(this.value)">
                         <span style="font-weight: 500;">400电话</span>
@@ -2664,10 +2743,6 @@
                       <label style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid var(--gray-200); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--gray-200)'">
                         <input type="radio" name="contact-method" value="online" style="width: 18px; height: 18px; accent-color: var(--primary);" onchange="handleContactMethodChange(this.value)">
                         <span style="font-weight: 500;">在线客服</span>
-                      </label>
-                      <label style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid var(--gray-200); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--gray-200)'">
-                        <input type="radio" name="contact-method" value="outbound" style="width: 18px; height: 18px; accent-color: var(--primary);" onchange="handleContactMethodChange(this.value)">
-                        <span style="font-weight: 500;">外呼</span>
                       </label>
                     </div>
                     <div id="contact-method-error" style="color: var(--danger); font-size: 12px; margin-top: 6px; display: none;">请选择沟通方式</div>
@@ -2745,7 +2820,7 @@
                     </div>
                     <div class="info-item">
                       <span class="info-label">手机号</span>
-                      <span class="info-value">139****9002</span>
+                      <span class="info-value">13912349002</span>
                     </div>
                     <div class="info-item">
                       <span class="info-label">会员类型</span>
@@ -2841,7 +2916,7 @@
                       <td style="padding: 14px 16px; font-weight: 600;">¥299.00</td>
                       <td style="padding: 14px 16px; color: var(--secondary);">¥299.00</td>
                       <td style="padding: 14px 16px;"><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13800138001</a></td>
-                      <td style="padding: 14px 16px;">138****8001</td>
+                      <td style="padding: 14px 16px;">13812348001</td>
                       <td style="padding: 14px 16px; color: var(--gray-600);">2024-03-08 10:25:00</td>
                       <td style="padding: 14px 16px;">张三</td>
                       <td style="padding: 14px 16px;">
@@ -2856,7 +2931,7 @@
                       <td style="padding: 14px 16px; font-weight: 600;">¥159.00</td>
                       <td style="padding: 14px 16px; color: var(--warning);">¥80.00</td>
                       <td style="padding: 14px 16px;"><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13900139002</a></td>
-                      <td style="padding: 14px 16px;">139****9002</td>
+                      <td style="padding: 14px 16px;">13912349002</td>
                       <td style="padding: 14px 16px; color: var(--gray-600);">2024-03-08 09:10:00</td>
                       <td style="padding: 14px 16px;">李四</td>
                       <td style="padding: 14px 16px;">
@@ -2871,7 +2946,7 @@
                       <td style="padding: 14px 16px; font-weight: 600;">¥599.00</td>
                       <td style="padding: 14px 16px; color: var(--gray-400);">-</td>
                       <td style="padding: 14px 16px;"><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13700137003</a></td>
-                      <td style="padding: 14px 16px;">137****7003</td>
+                      <td style="padding: 14px 16px;">13712347003</td>
                       <td style="padding: 14px 16px; color: var(--gray-600);">2024-03-08 07:55:00</td>
                       <td style="padding: 14px 16px;">-</td>
                       <td style="padding: 14px 16px;">
@@ -2925,6 +3000,14 @@
                   <input type="text" class="filter-input" placeholder="输入订单号">
                 </div>
                 <div class="filter-item">
+                  <span class="filter-label">订单类型</span>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="direct">直充</option>
+                    <option value="subscription">订阅</option>
+                  </select>
+                </div>
+                <div class="filter-item">
                   <span class="filter-label">用户手机号</span>
                   <input type="text" class="filter-input" placeholder="输入手机号">
                 </div>
@@ -2972,6 +3055,7 @@
                     <th>申请渠道</th>
                     <th>申请时间</th>
                     <th>订单号</th>
+                    <th>订单类型</th>
                     <th>订单金额</th>
                     <th>实际退款金额</th>
                     <th>退款状态</th>
@@ -2990,12 +3074,13 @@
                     <td><span class="type-tag type-refund">App</span></td>
                     <td>2024-03-08 10:35</td>
                     <td><span class="table-id">ORD20240308001</span></td>
+                    <td><span class="type-tag" style="background: #E6F4FF; color: #1677FF;">直充</span></td>
                     <td>¥299.00</td>
                     <td style="font-weight: 600; color: var(--danger);">¥299.00</td>
                     <td><span class="status-tag status-pending">待退款</span></td>
                     <td><span class="status-tag status-warning">待处理</span></td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13800138001</a></td>
-                    <td>138****8001</td>
+                    <td>13812348001</td>
                     <td>2024-03-08 10:30</td>
                     <td>张三</td>
                     <td style="display: flex; flex-direction: column; gap: 4px;">
@@ -3009,12 +3094,13 @@
                     <td><span class="type-tag type-service">小程序</span></td>
                     <td>2024-03-08 11:20</td>
                     <td><span class="table-id">ORD20240308002</span></td>
+                    <td><span class="type-tag" style="background: #F6EDFF; color: #722ED1;">订阅</span></td>
                     <td>¥599.00</td>
                     <td style="font-weight: 600; color: var(--warning);">¥299.00</td>
                     <td><span class="status-tag status-success">部分退款</span></td>
                     <td><span class="status-tag status-success">已处理</span></td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13700137003</a></td>
-                    <td>137****7003</td>
+                    <td>13712347003</td>
                     <td>2024-03-08 08:00</td>
                     <td>李四</td>
                     <td style="display: flex; flex-direction: column; gap: 4px;">
@@ -3028,12 +3114,13 @@
                     <td><span class="type-tag type-other">400电话</span></td>
                     <td>2024-03-07 17:00</td>
                     <td><span class="table-id">ORD20240307003</span></td>
+                    <td><span class="type-tag" style="background: #E6F4FF; color: #1677FF;">直充</span></td>
                     <td>¥89.00</td>
                     <td style="font-weight: 600; color: var(--danger);">¥89.00</td>
                     <td><span class="status-tag status-danger">退款失败</span></td>
                     <td><span class="status-tag status-success">已处理</span></td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13600136004</a></td>
-                    <td>136****6004</td>
+                    <td>13612346004</td>
                     <td>2024-03-07 16:45</td>
                     <td>王五</td>
                     <td style="display: flex; flex-direction: column; gap: 4px;">
@@ -3131,7 +3218,7 @@
                     <td>¥299.00</td>
                     <td style="font-weight: 600; color: var(--danger);">¥299.00</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13800138001</a></td>
-                    <td>138****8001</td>
+                    <td>13812348001</td>
                     <td>2024-03-08 10:30</td>
                     <td><span class="type-tag type-other">自动</span></td>
                   </tr>
@@ -3145,7 +3232,7 @@
                     <td>¥159.00</td>
                     <td style="font-weight: 600; color: var(--danger);">¥159.00</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13900139002</a></td>
-                    <td>139****9002</td>
+                    <td>13912349002</td>
                     <td>2024-03-08 09:15</td>
                     <td><span class="type-tag type-other">自动</span></td>
                   </tr>
@@ -3159,7 +3246,7 @@
                     <td>¥599.00</td>
                     <td style="font-weight: 600; color: var(--danger);">¥599.00</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13700137003</a></td>
-                    <td>137****7003</td>
+                    <td>13712347003</td>
                     <td>2024-03-07 14:20</td>
                     <td><span class="type-tag type-other">自动</span></td>
                   </tr>
@@ -3173,7 +3260,7 @@
                     <td>¥89.00</td>
                     <td style="font-weight: 600; color: var(--danger);">¥89.00</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13600136004</a></td>
-                    <td>136****6004</td>
+                    <td>13612346004</td>
                     <td>2024-03-06 16:45</td>
                     <td><span class="type-tag type-other">自动</span></td>
                   </tr>
@@ -3187,7 +3274,7 @@
                     <td>¥399.00</td>
                     <td style="font-weight: 600; color: var(--danger);">¥399.00</td>
                     <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13500135005</a></td>
-                    <td>135****5005</td>
+                    <td>13512345005</td>
                     <td>2024-03-05 11:30</td>
                     <td><span class="type-tag type-other">自动</span></td>
                   </tr>
@@ -3665,9 +3752,9 @@
             <div class="card-body">
               <!-- 查询类型Tab -->
               <div class="query-tabs" style="display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid var(--gray-200);">
-                <button class="query-tab active" data-type="order" onclick="switchQueryTab('order')">订单号</button>
+                <button class="query-tab active" data-type="phone" onclick="switchQueryTab('phone')">手机号</button>
+                <button class="query-tab" data-type="order" onclick="switchQueryTab('order')">订单号</button>
                 <button class="query-tab" data-type="userId" onclick="switchQueryTab('userId')">用户ID</button>
-                <button class="query-tab" data-type="phone" onclick="switchQueryTab('phone')">手机号</button>
               </div>
               
               <!-- 搜索输入区 -->
@@ -3690,29 +3777,29 @@
                 <div style="font-size: 14px; color: var(--gray-600); margin-bottom: 12px;">查询结果：共找到 <strong style="color: var(--primary);">3</strong> 条订单记录</div>
                 <table class="data-table" style="table-layout: fixed;">
                   <colgroup>
+                    <col style="width: 8%;">
                     <col style="width: 9%;">
-                    <col style="width: 10%;">
-                    <col style="width: 12%;">
-                    <col style="width: 9%;">
-                    <col style="width: 10%;">
-                    <col style="width: 9%;">
-                    <col style="width: 10%;">
-                    <col style="width: 10%;">
                     <col style="width: 11%;">
                     <col style="width: 8%;">
-                    <col style="width: 12%;">
+                    <col style="width: 8%;">
+                    <col style="width: 8%;">
+                    <col style="width: 9%;">
+                    <col style="width: 9%;">
+                    <col style="width: 10%;">
+                    <col style="width: 7%;">
+                    <col style="width: 11%;">
                   </colgroup>
                   <thead>
                     <tr>
                       <th>应用名称</th>
                       <th>商户名称</th>
                       <th>订单号</th>
+                      <th>订单类型</th>
                       <th>订单金额</th>
                       <th>实际退款金额</th>
                       <th>订单状态</th>
                       <th>用户ID</th>
                       <th>用户手机号</th>
-                      <th>支付时间</th>
                       <th>处理人</th>
                       <th>操作</th>
                     </tr>
@@ -3722,12 +3809,12 @@
                       <td>XX出行</td>
                       <td>杭州分公司</td>
                       <td><span class="table-id">OD20240308001</span></td>
+                      <td><span class="type-tag" style="background: #E6F4FF; color: #1677FF;">直充</span></td>
                       <td>¥120.00</td>
                       <td>-</td>
                       <td><span class="status-tag status-success">充值成功</span></td>
                       <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13800138001</a></td>
-                      <td>138****8001</td>
-                      <td>2024-03-08 10:30:25</td>
+                      <td>13812348001</td>
                       <td>张小明</td>
                       <td style="display: flex; flex-direction: column; gap: 4px;">
                         <button class="action-btn" onclick="openOrderRefundModal('full', 'OD20240308001', 120)" style="padding: 4px 8px; font-size: 12px; white-space: nowrap;">全额退款</button>
@@ -3738,12 +3825,12 @@
                       <td>XX出行</td>
                       <td>北京分公司</td>
                       <td><span class="table-id">OD20240308002</span></td>
+                      <td><span class="type-tag" style="background: #F6EDFF; color: #722ED1;">订阅</span></td>
                       <td>¥85.00</td>
                       <td>¥85.00</td>
                       <td><span class="status-tag status-success">全额退款</span></td>
                       <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13900139002</a></td>
-                      <td>139****9002</td>
-                      <td>2024-03-08 09:15:18</td>
+                      <td>13912349002</td>
                       <td>李小红</td>
                       <td style="display: flex; flex-direction: column; gap: 4px;">
                         <button class="action-btn" onclick="openOrderRefundModal('full', 'OD20240308002', 85)" style="padding: 4px 8px; font-size: 12px; white-space: nowrap;">全额退款</button>
@@ -3754,12 +3841,12 @@
                       <td>XX出行</td>
                       <td>深圳分公司</td>
                       <td><span class="table-id">OD20240307005</span></td>
+                      <td><span class="type-tag" style="background: #E6F4FF; color: #1677FF;">直充</span></td>
                       <td>¥156.00</td>
                       <td>¥78.00</td>
                       <td><span class="status-tag status-warning">部分退款</span></td>
                       <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13700137003</a></td>
-                      <td>137****7003</td>
-                      <td>2024-03-07 14:20:33</td>
+                      <td>13712347003</td>
                       <td>王小强</td>
                       <td style="display: flex; flex-direction: column; gap: 4px;">
                         <button class="action-btn" onclick="openOrderRefundModal('full', 'OD20240307005', 78)" style="padding: 4px 8px; font-size: 12px; white-space: nowrap;">全额退款</button>
@@ -3786,13 +3873,13 @@
                     <tr>
                       <td>XX出行</td>
                       <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13800138001</a></td>
-                      <td>138****8001</td>
+                      <td>13812348001</td>
                       <td>2025-03-08 10:30:25</td>
                     </tr>
                     <tr>
                       <td>XX出行</td>
                       <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13900139002</a></td>
-                      <td>139****9002</td>
+                      <td>13912349002</td>
                       <td>2024-12-31 23:59:59</td>
                     </tr>
                   </tbody>
@@ -3815,13 +3902,13 @@
                     <tr>
                       <td>XX出行</td>
                       <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13800138001</a></td>
-                      <td>138****8001</td>
+                      <td>13812348001</td>
                       <td>2025-03-08 10:30:25</td>
                     </tr>
                     <tr>
                       <td>XX出行</td>
                       <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13900139002</a></td>
-                      <td>139****9002</td>
+                      <td>13912349002</td>
                       <td>2024-12-31 23:59:59</td>
                     </tr>
                   </tbody>
@@ -4068,6 +4155,72 @@
         </div>
         
         <!-- 附件查看弹窗 -->
+        <!-- 补充材料弹窗 -->
+        <div class="modal-overlay" id="supplement-modal">
+          <div class="modal" style="max-width: 560px;">
+            <div class="modal-header">
+              <h3 class="modal-title">补充材料</h3>
+              <button class="modal-close" onclick="closeModal('supplement-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+              <!-- 基本信息展示 -->
+              <div style="background: var(--gray-50); border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px; font-size: 13px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <div><span style="color: var(--gray-500);">挽留ID：</span><span id="supp-retention-id" style="font-family: monospace;">-</span></div>
+                  <div><span style="color: var(--gray-500);">退款金额：</span><span style="color: var(--danger); font-weight: 600;">¥0.00</span></div>
+                  <div><span style="color: var(--gray-500);">应用名称：</span><span id="supp-app-name">-</span></div>
+                  <div><span style="color: var(--gray-500);">用户ID：</span><span id="supp-user-id">-</span></div>
+                </div>
+              </div>
+
+              <!-- 无通话录音时强制提示 -->
+              <div id="supp-no-recording-tip" style="background: var(--warning-light); border: 1px solid var(--warning); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: var(--gray-700); display: none;">
+                ⚠️ 该挽留记录<strong>无400通话录音关联</strong>，须上传补充材料后方可提交审核。
+              </div>
+
+              <!-- 有通话录音提示 -->
+              <div id="supp-has-recording-tip" style="background: var(--secondary-light); border: 1px solid var(--secondary); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: var(--gray-700); display: none;">
+                ✅ 已关联400通话录音，补充材料为<strong>选填</strong>，可直接提交。
+              </div>
+
+              <!-- 材料类型 -->
+              <div class="form-group">
+                <label class="form-label">材料类型 <span id="supp-required-mark" style="color: var(--danger);">*</span></label>
+                <select class="form-select" id="supp-material-type">
+                  <option value="">请选择材料类型</option>
+                  <option value="chat">聊天记录截图</option>
+                  <option value="complaint">投诉截图</option>
+                  <option value="proof">其他证明材料</option>
+                </select>
+                <div id="supp-material-type-error" style="color: var(--danger); font-size: 12px; margin-top: 4px; display: none;">请选择材料类型</div>
+              </div>
+
+              <!-- 上传附件 -->
+              <div class="form-group">
+                <label class="form-label">上传附件 <span id="supp-upload-required-mark" style="color: var(--danger);">*</span></label>
+                <div style="border: 2px dashed var(--gray-300); border-radius: var(--radius-md); padding: 20px; text-align: center; cursor: pointer;" onclick="document.getElementById('supp-file-input').click()">
+                  <div style="font-size: 32px; margin-bottom: 8px;">📎</div>
+                  <div style="color: var(--gray-600); font-size: 14px;">点击上传或拖拽文件到此处</div>
+                  <div style="color: var(--gray-400); font-size: 12px; margin-top: 4px;">支持图片、PDF、Word，单个文件不超过10MB</div>
+                  <input type="file" id="supp-file-input" style="display: none;" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" onchange="handleSuppFileUpload(this)">
+                </div>
+                <div id="supp-file-list" style="margin-top: 10px;"></div>
+                <div id="supp-upload-error" style="color: var(--danger); font-size: 12px; margin-top: 4px; display: none;">请上传至少一个附件</div>
+              </div>
+
+              <!-- 备注 -->
+              <div class="form-group">
+                <label class="form-label">备注说明</label>
+                <textarea class="form-textarea" id="supp-remark" rows="3" placeholder="可补充说明材料内容或挽留过程..."></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" onclick="closeModal('supplement-modal')">取消</button>
+              <button class="btn btn-primary" onclick="submitSupplementModal()">提交审核</button>
+            </div>
+          </div>
+        </div>
+
         <div class="modal-overlay" id="attachment-view-modal">
           <div class="modal" style="max-width: 600px;">
             <div class="modal-header">
@@ -4310,6 +4463,312 @@
           </div>
         </div>
         
+        <!-- 挽留提交表 -->
+        <div class="page" id="retention-submit">
+          <div class="content-card">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="card-title-icon">📝</div>
+                <span>挽留提交表</span>
+              </div>
+              <div style="font-size: 12px; color: var(--gray-500); background: var(--primary-light); padding: 4px 12px; border-radius: 20px;">仅客服可见</div>
+            </div>
+            <div class="card-body">
+              <!-- 筛选栏 -->
+              <div class="filter-bar" style="margin-bottom: 20px;">
+                <div class="filter-item">
+                  <label class="filter-label">挽留状态</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="draft">待补充材料</option>
+                    <option value="ready">待提交</option>
+                    <option value="pending">待审核</option>
+                    <option value="approved">审核通过</option>
+                    <option value="rejected">审核驳回</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">挽留类型</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="full">全额未退挽留</option>
+                    <option value="partial">部分退款挽留</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">应用名称</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="ai-input">AI输入法</option>
+                    <option value="draw-sing">绘唱相机</option>
+                    <option value="xx">XX出行</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">来源渠道</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="alipay">支付宝投诉</option>
+                    <option value="wechat">微信投诉</option>
+                    <option value="app">APP内退款</option>
+                    <option value="tel400">400电话</option>
+                    <option value="online">在线客服</option>
+                    <option value="feedback">意见反馈</option>
+                    <option value="supervision">监管投诉</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">提交时间</label>
+                  <input type="date" class="filter-input">
+                  <span style="color: var(--gray-400); padding: 0 4px;">~</span>
+                  <input type="date" class="filter-input">
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">用户ID / 手机号</label>
+                  <input type="text" class="filter-input" placeholder="请输入">
+                </div>
+                <button class="btn btn-primary">🔍 查询</button>
+                <button class="btn btn-outline">重置</button>
+              </div>
+
+              <!-- 统计卡片 -->
+              <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;">
+                <div style="background: var(--warning-light); padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid var(--warning);">
+                  <div style="font-size: 22px; font-weight: 700; color: var(--warning);">3</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">待补充材料</div>
+                </div>
+                <div style="background: #f0f4ff; padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid #6366f1;">
+                  <div style="font-size: 22px; font-weight: 700; color: #6366f1;">5</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">待提交</div>
+                </div>
+                <div style="background: var(--primary-light); padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid var(--primary);">
+                  <div style="font-size: 22px; font-weight: 700; color: var(--primary);">8</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">待审核</div>
+                </div>
+                <div style="background: var(--secondary-light); padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid var(--secondary);">
+                  <div style="font-size: 22px; font-weight: 700; color: var(--secondary);">52</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">本月已通过</div>
+                </div>
+                <div style="background: var(--danger-light); padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid var(--danger);">
+                  <div style="font-size: 22px; font-weight: 700; color: var(--danger);">5</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">本月已驳回</div>
+                </div>
+              </div>
+
+              <!-- 提交表表格 -->
+              <div style="overflow-x: auto;">
+                <table class="data-table" style="min-width: 2200px;">
+                  <thead>
+                    <tr>
+                      <th>挽留ID</th>
+                      <th>应用名称</th>
+                      <th>用户ID</th>
+                      <th>手机号</th>
+                      <th>来源渠道</th>
+                      <th>400通话ID</th>
+                      <th>400录音</th>
+                      <th>关联订单数</th>
+                      <th>订单总金额</th>
+                      <th>已退款金额</th>
+                      <th>挽留金额</th>
+                      <th>挽留类型</th>
+                      <th>补充材料</th>
+                      <th>客服备注</th>
+                      <th>提交状态</th>
+                      <th>挽留状态</th>
+                      <th>提交人</th>
+                      <th>提交时间</th>
+                      <th>驳回次数</th>
+                      <th>最近更新</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- 行1：退款=0，有录音 → 待审核 -->
+                    <tr>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary);">
+                        <a href="#" onclick="showPage('retention-submit-detail')" style="color: var(--primary);">RET20240308001</a>
+                      </td>
+                      <td>AI输入法</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13800138001</a></td>
+                      <td style="color: var(--gray-500);">13812348001</td>
+                      <td><span class="type-tag type-service" style="font-size: 11px;">支付宝投诉</span></td>
+                      <td style="font-family: monospace; font-size: 11px; color: var(--primary);">
+                        <a href="#" style="color: var(--primary);">CALL20240308001</a>
+                      </td>
+                      <td>
+                        <button style="background: none; border: none; cursor: pointer; color: var(--secondary); font-size: 12px; padding: 0;" onclick="showToast('播放通话录音', 'info')">
+                          ▶ 播放
+                        </button>
+                      </td>
+                      <td style="text-align: center;">2</td>
+                      <td style="text-align: right; font-weight: 500;">¥168.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥168.00</td>
+                      <td><span class="type-tag" style="background: #fff3cd; color: #856404; font-size: 11px;">全额未退挽留</span></td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--gray-600); font-size: 12px;" title="用户要求取消订阅，已电话沟通挽留">用户要求取消订阅，已电话沟通挽留</td>
+                      <td><span class="status-tag status-resolved" style="font-size: 11px;">已提交</span></td>
+                      <td><span class="status-tag status-pending" style="font-size: 11px;">待审核</span></td>
+                      <td style="font-size: 12px;">张三</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-08 10:20</td>
+                      <td style="text-align: center; color: var(--gray-400);">0</td>
+                      <td style="font-size: 12px; color: var(--gray-400); white-space: nowrap;">2024-03-08 10:20</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <button class="action-btn" onclick="openRetentionDetailPanel('RET20240308001')" style="font-size: 11px; padding: 3px 8px;">查看详情</button>
+                          <button class="action-btn" onclick="openOrderDetailPage('RET20240308001', 'retention-submit')" style="font-size: 11px; padding: 3px 8px; background: var(--primary-light); color: var(--primary);">订单明细(2)</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <!-- 行2：退款=0，无录音 → 待补充材料 -->
+                    <tr style="background: #fffbf0;">
+                      <td style="font-family: monospace; font-size: 12px;">
+                        <a href="#" style="color: var(--primary);">RET20240308002</a>
+                      </td>
+                      <td>绘唱相机</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13900139006</a></td>
+                      <td style="color: var(--gray-500);">13912349006</td>
+                      <td><span class="type-tag type-complaint" style="font-size: 11px;">APP内退款</span></td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td><span style="color: var(--danger); font-size: 12px;">❌ 无录音</span></td>
+                      <td style="text-align: center;">1</td>
+                      <td style="text-align: right; font-weight: 500;">¥98.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥98.00</td>
+                      <td><span class="type-tag" style="background: #fff3cd; color: #856404; font-size: 11px;">全额未退挽留</span></td>
+                      <td style="text-align: center;">
+                        <button class="action-btn" style="background: var(--warning); color: white; font-size: 11px; padding: 3px 8px; white-space: nowrap;" onclick="openSupplementModal('RET20240308002', false)">待补充</button>
+                      </td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--gray-600); font-size: 12px;" title="功能不满意，投诉要求退款">功能不满意，投诉要求退款</td>
+                      <td><span class="status-tag" style="background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning); font-size: 11px;">未提交</span></td>
+                      <td><span class="status-tag" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107; font-size: 11px;">待补充材料</span></td>
+                      <td style="font-size: 12px;">李四</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap; color: var(--gray-400);">-</td>
+                      <td style="text-align: center; color: var(--gray-400);">0</td>
+                      <td style="font-size: 12px; color: var(--gray-400); white-space: nowrap;">2024-03-08 09:15</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <button class="action-btn" style="background: var(--warning); color: white; font-size: 11px; padding: 3px 8px;" onclick="openSupplementModal('RET20240308002', false)">补充材料</button>
+                          <button class="action-btn" onclick="openOrderDetailPage('RET20240308002', 'retention-submit')" style="font-size: 11px; padding: 3px 8px; background: var(--primary-light); color: var(--primary);">订单明细(1)</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <!-- 行3：退款>0 < 订单金额 → 自动待审核（部分退款挽留） -->
+                    <tr>
+                      <td style="font-family: monospace; font-size: 12px;">
+                        <a href="#" style="color: var(--primary);">RET20240307001</a>
+                      </td>
+                      <td>AI输入法</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13700137007</a></td>
+                      <td style="color: var(--gray-500);">13712347007</td>
+                      <td><span class="type-tag type-service" style="font-size: 11px;">400电话</span></td>
+                      <td style="font-family: monospace; font-size: 11px; color: var(--primary);">
+                        <a href="#" style="color: var(--primary);">CALL20240307003</a>
+                      </td>
+                      <td>
+                        <button style="background: none; border: none; cursor: pointer; color: var(--secondary); font-size: 12px; padding: 0;" onclick="showToast('播放通话录音', 'info')">
+                          ▶ 播放
+                        </button>
+                      </td>
+                      <td style="text-align: center;">3</td>
+                      <td style="text-align: right; font-weight: 500;">¥360.00</td>
+                      <td style="text-align: right; color: var(--danger);">¥89.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥271.00</td>
+                      <td><span class="type-tag" style="background: #fce8ff; color: #9c27b0; font-size: 11px;">部分退款挽留</span></td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--gray-600); font-size: 12px;" title="部分退款挽留，已同意继续使用">部分退款挽留，已同意继续使用</td>
+                      <td><span class="status-tag status-resolved" style="font-size: 11px;">已提交</span></td>
+                      <td><span class="status-tag status-pending" style="font-size: 11px;">待审核</span></td>
+                      <td style="font-size: 12px;">王五</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-07 14:30</td>
+                      <td style="text-align: center; color: var(--gray-400);">0</td>
+                      <td style="font-size: 12px; color: var(--gray-400); white-space: nowrap;">2024-03-07 14:30</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <button class="action-btn" onclick="openRetentionDetailPanel('RET20240307001')" style="font-size: 11px; padding: 3px 8px;">查看详情</button>
+                          <button class="action-btn" onclick="openOrderDetailPage('RET20240307001', 'retention-submit')" style="font-size: 11px; padding: 3px 8px; background: var(--primary-light); color: var(--primary);">订单明细(3)</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <!-- 行4：已通过，被驳回过1次 -->
+                    <tr>
+                      <td style="font-family: monospace; font-size: 12px;">
+                        <a href="#" style="color: var(--primary);">RET20240306001</a>
+                      </td>
+                      <td>XX出行</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13600136008</a></td>
+                      <td style="color: var(--gray-500);">13612346008</td>
+                      <td><span class="type-tag type-service" style="font-size: 11px;">支付宝投诉</span></td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td><span style="color: var(--gray-400); font-size: 12px;">-</span></td>
+                      <td style="text-align: center;">1</td>
+                      <td style="text-align: right; font-weight: 500;">¥120.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥120.00</td>
+                      <td><span class="type-tag" style="background: #fff3cd; color: #856404; font-size: 11px;">全额未退挽留</span></td>
+                      <td style="text-align: center;"><a href="#" style="color: var(--primary); font-size: 12px;" onclick="openAttachmentModal('RET20240306001', 2)">查看(2)</a></td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--gray-600); font-size: 12px;" title="多次投诉，申请全额退款挽留，提供聊天记录">多次投诉，申请全额退款挽留</td>
+                      <td><span class="status-tag status-resolved" style="font-size: 11px;">已提交</span></td>
+                      <td><span class="status-tag status-resolved" style="font-size: 11px;">审核通过</span></td>
+                      <td style="font-size: 12px;">张三</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-06 09:10</td>
+                      <td style="text-align: center; color: var(--danger); font-weight: 600;">1</td>
+                      <td style="font-size: 12px; color: var(--gray-400); white-space: nowrap;">2024-03-06 16:45</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <button class="action-btn" onclick="openRetentionDetailPanel('RET20240306001')" style="font-size: 11px; padding: 3px 8px;">查看详情</button>
+                          <button class="action-btn" onclick="openOrderDetailPage('RET20240306001', 'retention-submit')" style="font-size: 11px; padding: 3px 8px; background: var(--primary-light); color: var(--primary);">订单明细(1)</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <!-- 行5：审核驳回，可重新提交 -->
+                    <tr style="background: #fff5f5;">
+                      <td style="font-family: monospace; font-size: 12px;">
+                        <a href="#" style="color: var(--primary);">RET20240305001</a>
+                      </td>
+                      <td>绘唱相机</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13500135009</a></td>
+                      <td style="color: var(--gray-500);">13512345009</td>
+                      <td><span class="type-tag type-complaint" style="font-size: 11px;">微信投诉</span></td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td><span style="color: var(--danger); font-size: 12px;">❌ 无录音</span></td>
+                      <td style="text-align: center;">1</td>
+                      <td style="text-align: right; font-weight: 500;">¥59.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥59.00</td>
+                      <td><span class="type-tag" style="background: #fff3cd; color: #856404; font-size: 11px;">全额未退挽留</span></td>
+                      <td style="text-align: center;"><a href="#" style="color: var(--primary); font-size: 12px;" onclick="openAttachmentModal('RET20240305001', 1)">查看(1)</a></td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--gray-600); font-size: 12px;" title="用户误购，已解释功能价值但仍坚持退款">用户误购，已解释功能价值但仍坚持退款</td>
+                      <td><span class="status-tag status-resolved" style="font-size: 11px;">已提交</span></td>
+                      <td><span class="status-tag status-cancelled" style="font-size: 11px;">审核驳回</span></td>
+                      <td style="font-size: 12px;">李四</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-05 11:00</td>
+                      <td style="text-align: center; color: var(--danger); font-weight: 600;">2</td>
+                      <td style="font-size: 12px; color: var(--gray-400); white-space: nowrap;">2024-03-06 10:20</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <button class="action-btn" onclick="openRetentionDetailPanel('RET20240305001')" style="font-size: 11px; padding: 3px 8px;">查看详情</button>
+                          <button class="action-btn" style="background: var(--warning); color: white; font-size: 11px; padding: 3px 8px;" onclick="openSupplementModal('RET20240305001', false)">重新提交</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- 分页 -->
+              <div class="pagination">
+                <button class="page-btn" disabled>上一页</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">下一页</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 挽留审核列表 -->
         <div class="page" id="retention-audit">
           <div class="content-card">
@@ -4318,8 +4777,8 @@
                 <div class="card-title-icon">📋</div>
                 <span>挽留审核列表</span>
               </div>
-              <div class="card-actions">
-                <button class="btn btn-primary" onclick="openAddRetentionModal()">➕ 添加挽留订单</button>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 12px; color: #9c27b0; background: #fce8ff; padding: 4px 12px; border-radius: 20px;">仅审核人员可见</div>
               </div>
             </div>
             <div class="card-body">
@@ -4330,148 +4789,269 @@
                   <select class="filter-select">
                     <option value="">全部</option>
                     <option value="pending" selected>待审核</option>
-                    <option value="approved">已通过</option>
-                    <option value="rejected">已驳回</option>
+                    <option value="approved">审核通过</option>
+                    <option value="rejected">审核驳回</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">挽留类型</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="full">全额未退挽留</option>
+                    <option value="partial">部分退款挽留</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">应用名称</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="ai-input">AI输入法</option>
+                    <option value="draw-sing">绘唱相机</option>
+                    <option value="xx">XX出行</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">是否关联400通话</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
                   </select>
                 </div>
                 <div class="filter-item">
                   <label class="filter-label">提交时间</label>
+                  <input type="date" class="filter-input">
+                  <span style="color: var(--gray-400); padding: 0 4px;">~</span>
                   <input type="date" class="filter-input">
                 </div>
                 <div class="filter-item">
                   <label class="filter-label">提交人</label>
                   <input type="text" class="filter-input" placeholder="请输入提交人">
                 </div>
-                <button class="btn btn-primary">查询</button>
+                <div class="filter-item">
+                  <label class="filter-label">用户ID / 手机号</label>
+                  <input type="text" class="filter-input" placeholder="请输入">
+                </div>
+                <button class="btn btn-primary">🔍 查询</button>
+                <button class="btn btn-outline">重置</button>
               </div>
-              
+
               <!-- 统计卡片 -->
-              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;">
-                <div style="background: var(--primary-light); padding: 16px; border-radius: var(--radius-md); text-align: center;">
-                  <div style="font-size: 24px; font-weight: 700; color: var(--primary);">12</div>
-                  <div style="font-size: 13px; color: var(--gray-600);">待审核</div>
+              <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;">
+                <div style="background: var(--primary-light); padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid var(--primary);">
+                  <div style="font-size: 22px; font-weight: 700; color: var(--primary);">12</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">待审核</div>
                 </div>
-                <div style="background: var(--secondary-light); padding: 16px; border-radius: var(--radius-md); text-align: center;">
-                  <div style="font-size: 24px; font-weight: 700; color: var(--secondary);">86</div>
-                  <div style="font-size: 13px; color: var(--gray-600);">本月已通过</div>
+                <div style="background: var(--secondary-light); padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid var(--secondary);">
+                  <div style="font-size: 22px; font-weight: 700; color: var(--secondary);">86</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">本月已通过</div>
                 </div>
-                <div style="background: var(--danger-light); padding: 16px; border-radius: var(--radius-md); text-align: center;">
-                  <div style="font-size: 24px; font-weight: 700; color: var(--danger);">8</div>
-                  <div style="font-size: 13px; color: var(--gray-600);">本月已驳回</div>
+                <div style="background: var(--danger-light); padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid var(--danger);">
+                  <div style="font-size: 22px; font-weight: 700; color: var(--danger);">8</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">本月已驳回</div>
                 </div>
-                <div style="background: var(--warning-light); padding: 16px; border-radius: var(--radius-md); text-align: center;">
-                  <div style="font-size: 24px; font-weight: 700; color: var(--warning);">92%</div>
-                  <div style="font-size: 13px; color: var(--gray-600);">通过率</div>
+                <div style="background: var(--warning-light); padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid var(--warning);">
+                  <div style="font-size: 22px; font-weight: 700; color: var(--warning);">92%</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">通过率</div>
+                </div>
+                <div style="background: #f0fff4; padding: 14px 16px; border-radius: var(--radius-md); text-align: center; border-left: 3px solid #52c41a;">
+                  <div style="font-size: 22px; font-weight: 700; color: #52c41a;">¥32,850</div>
+                  <div style="font-size: 12px; color: var(--gray-600);">本月挽留金额</div>
                 </div>
               </div>
-              
+
               <!-- 审核列表表格 -->
               <div style="overflow-x: auto;">
-                <table class="data-table" style="min-width: 1400px;">
-                <thead>
-                  <tr>
-                    <th>日期</th>
-                    <th>挽留订单号</th>
-                    <th>挽留金额(元)</th>
-                    <th>附件</th>
-                    <th>应用名称</th>
-                    <th>用户ID</th>
-                    <th>用户手机号</th>
-                    <th>备注内容</th>
-                    <th>审核状态</th>
-                    <th>申请人</th>
-                    <th>审核人</th>
-                    <th>审核时间</th>
-                    <th>操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style="color: var(--gray-600);">2024-03-08</td>
-                    <td style="font-family: monospace; font-size: 13px;">
-                      <div>RET20240308001</div>
-                      <div style="font-size: 11px; color: var(--gray-400);">等2笔</div>
-                    </td>
-                    <td style="color: var(--danger); font-weight: 500;">¥120.00</td>
-                    <td><a href="#" style="color: var(--primary);" onclick="openAttachmentModal('RET20240308001', 2)">查看(2)</a></td>
-                    <td>XX出行</td>
-                    <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13800138001</a></td>
-                    <td>138****8001</td>
-                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="用户投诉退款，已沟通挽留">用户投诉退款，已沟通挽留</td>
-                    <td><span class="status-tag status-pending">待审核</span></td>
-                    <td>张三</td>
-                    <td>-</td>
-                    <td style="color: var(--gray-400);">-</td>
-                    <td>
-                      <div style="display: flex; gap: 8px;">
-                        <button class="action-btn" style="background: var(--secondary); color: white;" onclick="approveRetention('RET20240308001')">通过</button>
-                        <button class="action-btn" style="background: var(--danger); color: white;" onclick="rejectRetention('RET20240308001')">驳回</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="color: var(--gray-600);">2024-03-08</td>
-                    <td style="font-family: monospace; font-size: 13px;">RET20240308002</td>
-                    <td style="color: var(--gray-500);">-</td>
-                    <td><a href="#" style="color: var(--primary);" onclick="openAttachmentModal('RET20240308002', 1)">查看(1)</a></td>
-                    <td>XX出行</td>
-                    <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13900139002</a></td>
-                    <td>139****9002</td>
-                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="服务补偿挽留，赠送会员7天">服务补偿挽留，赠送会员7天</td>
-                    <td><span class="status-tag status-pending">待审核</span></td>
-                    <td>李四</td>
-                    <td>-</td>
-                    <td style="color: var(--gray-400);">-</td>
-                    <td>
-                      <div style="display: flex; gap: 8px;">
-                        <button class="action-btn" style="background: var(--secondary); color: white;" onclick="approveRetention('RET20240308002')">通过</button>
-                        <button class="action-btn" style="background: var(--danger); color: white;" onclick="rejectRetention('RET20240308002')">驳回</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="color: var(--gray-600);">2024-03-07</td>
-                    <td style="font-family: monospace; font-size: 13px;">
-                      <div>RET20240307001</div>
-                      <div style="font-size: 11px; color: var(--gray-400);">等3笔</div>
-                    </td>
-                    <td style="color: var(--danger); font-weight: 500;">¥356.00</td>
-                    <td><a href="#" style="color: var(--primary);" onclick="openAttachmentModal('RET20240307001', 3)">查看(3)</a></td>
-                    <td>XX出行</td>
-                    <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13700137003</a></td>
-                    <td>137****7003</td>
-                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="多次投诉，申请全额退款挽留">多次投诉，申请全额退款挽留</td>
-                    <td><span class="status-tag status-resolved">已通过</span></td>
-                    <td>王五</td>
-                    <td>赵六</td>
-                    <td style="color: var(--gray-600);">2024-03-07 17:20</td>
-                    <td>
-                      <button class="action-btn" onclick="showRetentionDetail('RET20240307001')">详情</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="color: var(--gray-600);">2024-03-07</td>
-                    <td style="font-family: monospace; font-size: 13px;">RET20240307002</td>
-                    <td style="color: var(--gray-500);">-</td>
-                    <td><a href="#" style="color: var(--primary);" onclick="openAttachmentModal('RET20240307002', 1)">查看(1)</a></td>
-                    <td>XX出行</td>
-                    <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary);">U13600136004</a></td>
-                    <td>136****6004</td>
-                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="无需退款，已电话沟通解决">无需退款，已电话沟通解决</td>
-                    <td><span class="status-tag status-cancelled">已驳回</span></td>
-                    <td>张三</td>
-                    <td>赵六</td>
-                    <td style="color: var(--gray-600);">2024-03-07 14:00</td>
-                    <td>
-                      <button class="action-btn" onclick="showRetentionDetail('RET20240307002')">详情</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              
-              </table>
+                <table class="data-table" style="min-width: 2400px;">
+                  <thead>
+                    <tr>
+                      <th>挽留ID</th>
+                      <th>应用名称</th>
+                      <th>用户ID</th>
+                      <th>手机号</th>
+                      <th>来源渠道</th>
+                      <th>是否关联400</th>
+                      <th>400通话ID</th>
+                      <th>400录音</th>
+                      <th>订单总金额</th>
+                      <th>已退款金额</th>
+                      <th>挽留金额</th>
+                      <th>挽留类型</th>
+                      <th>关联订单数</th>
+                      <th>补充材料</th>
+                      <th>客服备注</th>
+                      <th>提交人</th>
+                      <th>提交时间</th>
+                      <th>审核状态</th>
+                      <th>驳回原因</th>
+                      <th>审核意见</th>
+                      <th>审核人</th>
+                      <th>审核时间</th>
+                      <th>可重新提交</th>
+                      <th>当前节点</th>
+                      <th>更新时间</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- 行1：待审核，有400录音 -->
+                    <tr>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary); white-space: nowrap;">
+                        <a href="#" style="color: var(--primary);">RET20240308001</a>
+                      </td>
+                      <td>AI输入法</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13800138001</a></td>
+                      <td style="color: var(--gray-500); white-space: nowrap;">13812348001</td>
+                      <td><span class="type-tag type-service" style="font-size: 11px;">支付宝投诉</span></td>
+                      <td style="text-align: center;"><span style="color: var(--secondary); font-size: 12px;">✅ 是</span></td>
+                      <td style="font-family: monospace; font-size: 11px; color: var(--primary);">
+                        <a href="#" style="color: var(--primary);">CALL20240308001</a>
+                      </td>
+                      <td>
+                        <button style="background: none; border: none; cursor: pointer; color: var(--secondary); font-size: 12px; padding: 0;" onclick="showToast('播放通话录音', 'info')">▶ 播放</button>
+                      </td>
+                      <td style="text-align: right; font-weight: 500;">¥168.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥168.00</td>
+                      <td><span class="type-tag" style="background: #fff3cd; color: #856404; font-size: 11px;">全额未退挽留</span></td>
+                      <td style="text-align: center; font-weight: 600;">2</td>
+                      <td style="text-align: center; color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--gray-600);" title="用户要求取消订阅，已电话沟通挽留">用户要求取消订阅，已电话沟通挽留</td>
+                      <td style="font-size: 12px;">张三</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-08 10:20</td>
+                      <td><span class="status-tag status-pending" style="font-size: 11px;">待审核</span></td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td><span style="background: #e8f4ff; color: var(--primary); font-size: 11px; padding: 2px 8px; border-radius: 10px;">审核中</span></td>
+                      <td style="font-size: 12px; color: var(--gray-400); white-space: nowrap;">2024-03-08 10:20</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <button class="action-btn" style="background: var(--secondary); color: white; font-size: 11px; padding: 3px 8px;" onclick="openAuditModal('RET20240308001', 'approve')">通过</button>
+                          <button class="action-btn" style="background: var(--danger); color: white; font-size: 11px; padding: 3px 8px;" onclick="openAuditModal('RET20240308001', 'reject')">驳回</button>
+                          <button class="action-btn" onclick="openOrderDetailPage('RET20240308001', 'retention-audit')" style="font-size: 11px; padding: 3px 8px; background: var(--primary-light); color: var(--primary);">订单明细(2)</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <!-- 行2：待审核，无400录音，有补充材料 -->
+                    <tr>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary); white-space: nowrap;">
+                        <a href="#" style="color: var(--primary);">RET20240308002</a>
+                      </td>
+                      <td>绘唱相机</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13900139002</a></td>
+                      <td style="color: var(--gray-500); white-space: nowrap;">13912349002</td>
+                      <td><span class="type-tag type-complaint" style="font-size: 11px;">微信投诉</span></td>
+                      <td style="text-align: center;"><span style="color: var(--danger); font-size: 12px;">❌ 否</span></td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="text-align: right; font-weight: 500;">¥98.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥98.00</td>
+                      <td><span class="type-tag" style="background: #fff3cd; color: #856404; font-size: 11px;">全额未退挽留</span></td>
+                      <td style="text-align: center; font-weight: 600;">1</td>
+                      <td style="text-align: center;"><a href="#" style="color: var(--primary); font-size: 12px;" onclick="openAttachmentModal('RET20240308002', 1)">查看(1)</a></td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--gray-600);" title="服务补偿挽留，赠送会员7天">服务补偿挽留，赠送会员7天</td>
+                      <td style="font-size: 12px;">李四</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-08 09:30</td>
+                      <td><span class="status-tag status-pending" style="font-size: 11px;">待审核</span></td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td><span style="background: #e8f4ff; color: var(--primary); font-size: 11px; padding: 2px 8px; border-radius: 10px;">审核中</span></td>
+                      <td style="font-size: 12px; color: var(--gray-400); white-space: nowrap;">2024-03-08 09:30</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <button class="action-btn" style="background: var(--secondary); color: white; font-size: 11px; padding: 3px 8px;" onclick="openAuditModal('RET20240308002', 'approve')">通过</button>
+                          <button class="action-btn" style="background: var(--danger); color: white; font-size: 11px; padding: 3px 8px;" onclick="openAuditModal('RET20240308002', 'reject')">驳回</button>
+                          <button class="action-btn" onclick="openOrderDetailPage('RET20240308002', 'retention-audit')" style="font-size: 11px; padding: 3px 8px; background: var(--primary-light); color: var(--primary);">订单明细(1)</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <!-- 行3：已通过 -->
+                    <tr>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary); white-space: nowrap;">
+                        <a href="#" style="color: var(--primary);">RET20240307001</a>
+                      </td>
+                      <td>AI输入法</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13700137003</a></td>
+                      <td style="color: var(--gray-500); white-space: nowrap;">13712347003</td>
+                      <td><span class="type-tag type-service" style="font-size: 11px;">400电话</span></td>
+                      <td style="text-align: center;"><span style="color: var(--secondary); font-size: 12px;">✅ 是</span></td>
+                      <td style="font-family: monospace; font-size: 11px; color: var(--primary);">
+                        <a href="#" style="color: var(--primary);">CALL20240307002</a>
+                      </td>
+                      <td>
+                        <button style="background: none; border: none; cursor: pointer; color: var(--secondary); font-size: 12px; padding: 0;" onclick="showToast('播放通话录音', 'info')">▶ 播放</button>
+                      </td>
+                      <td style="text-align: right; font-weight: 500;">¥360.00</td>
+                      <td style="text-align: right; color: var(--danger);">¥89.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥271.00</td>
+                      <td><span class="type-tag" style="background: #fce8ff; color: #9c27b0; font-size: 11px;">部分退款挽留</span></td>
+                      <td style="text-align: center; font-weight: 600;">3</td>
+                      <td style="text-align: center; color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--gray-600);" title="多次投诉，申请全额退款挽留">多次投诉，申请全额退款挽留</td>
+                      <td style="font-size: 12px;">王五</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-07 14:30</td>
+                      <td><span class="status-tag status-resolved" style="font-size: 11px;">审核通过</span></td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--gray-600);" title="材料充分，挽留金额符合标准">材料充分，挽留金额符合标准</td>
+                      <td style="font-size: 12px;">赵六</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-07 17:20</td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td><span style="background: #f6ffed; color: var(--secondary); font-size: 11px; padding: 2px 8px; border-radius: 10px;">已完成</span></td>
+                      <td style="font-size: 12px; color: var(--gray-400); white-space: nowrap;">2024-03-07 17:20</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <button class="action-btn" onclick="openRetentionDetailPanel('RET20240307001')" style="font-size: 11px; padding: 3px 8px;">查看详情</button>
+                          <button class="action-btn" onclick="openOrderDetailPage('RET20240307001', 'retention-audit')" style="font-size: 11px; padding: 3px 8px; background: var(--primary-light); color: var(--primary);">订单明细(3)</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <!-- 行4：已驳回 -->
+                    <tr>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary); white-space: nowrap;">
+                        <a href="#" style="color: var(--primary);">RET20240307002</a>
+                      </td>
+                      <td>XX出行</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13600136004</a></td>
+                      <td style="color: var(--gray-500); white-space: nowrap;">13612346004</td>
+                      <td><span class="type-tag type-complaint" style="font-size: 11px;">APP内退款</span></td>
+                      <td style="text-align: center;"><span style="color: var(--danger); font-size: 12px;">❌ 否</span></td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="text-align: right; font-weight: 500;">¥59.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥59.00</td>
+                      <td><span class="type-tag" style="background: #fff3cd; color: #856404; font-size: 11px;">全额未退挽留</span></td>
+                      <td style="text-align: center; font-weight: 600;">1</td>
+                      <td style="text-align: center;"><a href="#" style="color: var(--primary); font-size: 12px;" onclick="openAttachmentModal('RET20240307002', 1)">查看(1)</a></td>
+                      <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--gray-600);" title="无需退款，已电话沟通解决">无需退款，已电话沟通解决</td>
+                      <td style="font-size: 12px;">张三</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-07 10:00</td>
+                      <td><span class="status-tag status-cancelled" style="font-size: 11px;">审核驳回</span></td>
+                      <td style="font-size: 12px; color: var(--danger);">材料不足</td>
+                      <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--gray-600);" title="截图不清晰，无法核实用户意愿，请补充清晰截图">截图不清晰，无法核实</td>
+                      <td style="font-size: 12px;">赵六</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-07 14:00</td>
+                      <td style="text-align: center;"><span style="color: var(--secondary); font-size: 12px;">✅ 是</span></td>
+                      <td><span style="background: #f9f9f9; color: var(--gray-600); font-size: 11px; padding: 2px 8px; border-radius: 10px;">已完成</span></td>
+                      <td style="font-size: 12px; color: var(--gray-400); white-space: nowrap;">2024-03-07 14:00</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                          <button class="action-btn" onclick="openRetentionDetailPanel('RET20240307002')" style="font-size: 11px; padding: 3px 8px;">查看详情</button>
+                          <button class="action-btn" onclick="openOrderDetailPage('RET20240307002', 'retention-audit')" style="font-size: 11px; padding: 3px 8px; background: var(--primary-light); color: var(--primary);">订单明细(1)</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              
+
               <!-- 分页 -->
               <div class="pagination">
                 <button class="page-btn" disabled>上一页</button>
@@ -4486,9 +5066,412 @@
           </div>
         </div>
       </div>
+        <!-- 客服个人页 -->
+        <div class="page" id="agent-profile">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+            <button onclick="showPage('complaint-list')" class="btn btn-outline" style="display: flex; align-items: center; gap: 4px;">
+              ← 返回首页
+            </button>
+          </div>
+          
+          <div class="content-card" style="margin-bottom: 20px;">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="card-title-icon">👤</div>
+                <span>个人中心</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div style="display: flex; gap: 40px; align-items: center;">
+                <div class="user-avatar-large" style="width: 80px; height: 80px; font-size: 32px;">李</div>
+                <div style="flex: 1;">
+                  <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">李客服</div>
+                  <div style="color: var(--gray-500); font-size: 14px;">高级客服专员</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 统计看板 -->
+          <div class="content-card">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="card-title-icon">📊</div>
+                <span>工作统计</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="tab-btn active" data-tab="today" onclick="switchAgentStatsTab('today')" style="padding: 6px 16px; border: none; background: var(--primary); color: white; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">今日</button>
+                <button class="tab-btn" data-tab="week" onclick="switchAgentStatsTab('week')" style="padding: 6px 16px; border: none; background: var(--gray-100); color: var(--gray-600); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">本周</button>
+                <button class="tab-btn" data-tab="month" onclick="switchAgentStatsTab('month')" style="padding: 6px 16px; border: none; background: var(--gray-100); color: var(--gray-600); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">本月</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="stat-card">
+                  <div class="stat-value" id="agent-stat-complaint" style="font-size: 24px; color: var(--primary);">23</div>
+                  <div class="stat-label">处理投诉</div>
+                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">
+                    <span style="color: #1677FF;">支付宝8</span> / 
+                    <span style="color: #52C41A;">小程序9</span> / 
+                    <span style="color: #FA8C16;">微信6</span>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="agent-stat-refund" style="font-size: 24px; color: var(--danger);">¥12,580</div>
+                  <div class="stat-label">退款金额</div>
+                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">
+                    <span style="color: #1677FF;">支付宝¥5,200</span> / 
+                    <span style="color: #52C41A;">小程序¥4,380</span> / 
+                    <span style="color: #FA8C16;">微信¥3,000</span>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="agent-stat-retention" style="font-size: 24px; color: var(--secondary);">¥8,560</div>
+                  <div class="stat-label">挽留金额</div>
+                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">
+                    <span style="color: #1677FF;">支付宝¥3,500</span> / 
+                    <span style="color: #52C41A;">小程序¥3,060</span> / 
+                    <span style="color: #FA8C16;">微信¥2,000</span>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="agent-stat-satisfaction" style="font-size: 24px; color: #52C41A;">98.5%</div>
+                  <div class="stat-label">400电话满意度</div>
+                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">较上月 +2.3%</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="agent-stat-escalated" style="font-size: 24px; color: #FA8C16;">3</div>
+                  <div class="stat-label">升级投诉数</div>
+                  <div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">用户对处理结果不满意二次投诉</div>
+                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">较上月 -1</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 订单明细表（二级页面） -->
+        <div class="page" id="retention-order-detail">
+          <!-- 面包屑/返回区 -->
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; color: var(--gray-500);">
+            <button onclick="goBackFromOrderDetail()" style="background: none; border: 1px solid var(--gray-300); border-radius: var(--radius-sm); padding: 4px 12px; cursor: pointer; color: var(--gray-600); display: flex; align-items: center; gap: 4px; font-size: 13px;">← 返回</button>
+            <span id="order-detail-breadcrumb" style="color: var(--gray-400);">挽留提交表</span>
+            <span style="color: var(--gray-300);">/</span>
+            <span style="color: var(--gray-700); font-weight: 500;" id="order-detail-breadcrumb-id">RET20240308001</span>
+            <span style="color: var(--gray-400);">订单明细</span>
+          </div>
+          <div class="content-card">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="card-title-icon">📦</div>
+                <span>订单明细表</span>
+              </div>
+              <div style="font-size: 12px; color: var(--gray-500); background: var(--gray-100); padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px;">
+                <span>挽留ID关联订单（一ID可对应多笔订单）</span>
+                <span style="color: var(--primary);">唯一键：应用名称 + 用户ID</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <!-- 筛选栏 -->
+              <div class="filter-bar" style="margin-bottom: 20px;">
+                <div class="filter-item">
+                  <label class="filter-label">挽留ID</label>
+                  <input type="text" class="filter-input" placeholder="输入挽留ID" id="filter-retention-id" value="RET20240308001">
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">应用名称</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="ai-input" selected>AI输入法</option>
+                    <option value="draw-sing">绘唱相机</option>
+                    <option value="xx">XX出行</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">用户ID</label>
+                  <input type="text" class="filter-input" placeholder="输入用户ID" value="U13800138001">
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">订单状态</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="paid">支付成功</option>
+                    <option value="partial">部分退款</option>
+                    <option value="refunded">退款成功</option>
+                  </select>
+                </div>
+                <div class="filter-item">
+                  <label class="filter-label">是否纳入挽留</label>
+                  <select class="filter-select">
+                    <option value="">全部</option>
+                    <option value="yes">是</option>
+                    <option value="no">否</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary">🔍 查询</button>
+                <button class="btn btn-outline">重置</button>
+              </div>
+
+              <!-- 关联挽留主记录信息 -->
+              <div style="background: var(--primary-light); border: 1px solid #c7d9ff; border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                  <span style="font-weight: 600; color: var(--primary);">📋 挽留主记录：RET20240308001</span>
+                  <span style="font-size: 12px; background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 10px;">全额未退挽留</span>
+                  <span class="status-tag status-pending" style="font-size: 11px;">待审核</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; font-size: 13px;">
+                  <div><span style="color: var(--gray-500);">应用名称：</span><span style="font-weight: 500;">AI输入法</span></div>
+                  <div><span style="color: var(--gray-500);">用户ID：</span><span style="font-weight: 500; color: var(--primary);">U13800138001</span></div>
+                  <div><span style="color: var(--gray-500);">关联主键：</span><span style="font-weight: 500;">AI输入法_U13800138001</span></div>
+                  <div><span style="color: var(--gray-500);">订单总金额：</span><span style="font-weight: 600;">¥168.00</span></div>
+                  <div><span style="color: var(--gray-500);">挽留金额：</span><span style="font-weight: 600; color: var(--danger);">¥168.00</span></div>
+                </div>
+              </div>
+
+              <!-- 订单明细表格 -->
+              <div style="overflow-x: auto;">
+                <table class="data-table" style="min-width: 1600px;">
+                  <thead>
+                    <tr>
+                      <th>明细ID</th>
+                      <th>挽留ID</th>
+                      <th>应用名称</th>
+                      <th>用户ID</th>
+                      <th>关联主键</th>
+                      <th>订单号</th>
+                      <th>订单状态</th>
+                      <th>支付金额</th>
+                      <th>退款金额</th>
+                      <th>挽留金额</th>
+                      <th>支付时间</th>
+                      <th>退款时间</th>
+                      <th>退款人</th>
+                      <th>退款渠道</th>
+                      <th>是否申请退款</th>
+                      <th>退款原因</th>
+                      <th>是否纳入挽留</th>
+                      <th>是否挽留成功</th>
+                      <th>备注</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- 挽留ID: RET20240308001 - 订单1 -->
+                    <tr>
+                      <td style="font-family: monospace; font-size: 11px; color: var(--gray-500);">DET240308001</td>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary);">
+                        <a href="#" style="color: var(--primary);">RET20240308001</a>
+                      </td>
+                      <td>AI输入法</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13800138001</a></td>
+                      <td style="font-size: 11px; color: var(--gray-500); white-space: nowrap;">AI输入法_U13800138001</td>
+                      <td style="font-family: monospace; font-size: 12px; white-space: nowrap;">ORD20240301001</td>
+                      <td><span class="type-tag type-service" style="font-size: 11px;">支付成功</span></td>
+                      <td style="text-align: right; font-weight: 500;">¥98.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥98.00</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-01-15 09:22</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="text-align: center;"><span style="color: var(--danger); font-size: 12px;">✅ 是</span></td>
+                      <td style="font-size: 12px; color: var(--gray-600);">效果不好</td>
+                      <td style="text-align: center;"><span style="color: var(--secondary); font-size: 12px;">✅ 是</span></td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td style="font-size: 12px; color: var(--gray-400);">-</td>
+                    </tr>
+                    <!-- 挽留ID: RET20240308001 - 订单2 -->
+                    <tr style="background: #f9fbff;">
+                      <td style="font-family: monospace; font-size: 11px; color: var(--gray-500);">DET240308002</td>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary);">
+                        <a href="#" style="color: var(--primary);">RET20240308001</a>
+                      </td>
+                      <td>AI输入法</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13800138001</a></td>
+                      <td style="font-size: 11px; color: var(--gray-500); white-space: nowrap;">AI输入法_U13800138001</td>
+                      <td style="font-family: monospace; font-size: 12px; white-space: nowrap;">ORD20240201002</td>
+                      <td><span class="type-tag type-service" style="font-size: 11px;">支付成功</span></td>
+                      <td style="text-align: right; font-weight: 500;">¥70.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥70.00</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-02-01 14:05</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="text-align: center;"><span style="color: var(--danger); font-size: 12px;">✅ 是</span></td>
+                      <td style="font-size: 12px; color: var(--gray-600);">效果不好</td>
+                      <td style="text-align: center;"><span style="color: var(--secondary); font-size: 12px;">✅ 是</span></td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td style="font-size: 12px; color: var(--gray-400);">新用户续费订单</td>
+                    </tr>
+                    <!-- 另一挽留ID订单（部分退款案例） -->
+                    <tr style="border-top: 2px solid var(--gray-200);">
+                      <td style="font-family: monospace; font-size: 11px; color: var(--gray-500);">DET240307001</td>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary);">
+                        <a href="#" style="color: var(--primary);">RET20240307001</a>
+                      </td>
+                      <td>AI输入法</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13700137007</a></td>
+                      <td style="font-size: 11px; color: var(--gray-500); white-space: nowrap;">AI输入法_U13700137007</td>
+                      <td style="font-family: monospace; font-size: 12px; white-space: nowrap;">ORD20240110003</td>
+                      <td><span style="background: #fff3cd; color: #856404; font-size: 11px; padding: 2px 8px; border-radius: 10px;">部分退款</span></td>
+                      <td style="text-align: right; font-weight: 500;">¥168.00</td>
+                      <td style="text-align: right; color: var(--danger);">¥89.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥79.00</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-01-10 16:30</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-03-05 11:20</td>
+                      <td style="font-size: 12px; color: var(--gray-600);">王五</td>
+                      <td style="font-size: 12px; color: var(--gray-600);">支付宝</td>
+                      <td style="text-align: center;"><span style="color: var(--danger); font-size: 12px;">✅ 是</span></td>
+                      <td style="font-size: 12px; color: var(--gray-600);">服务问题</td>
+                      <td style="text-align: center;"><span style="color: var(--secondary); font-size: 12px;">✅ 是</span></td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td style="font-size: 12px; color: var(--gray-400);">部分退款后继续使用</td>
+                    </tr>
+                    <!-- 同挽留ID另一笔订单 -->
+                    <tr style="background: #f9fbff;">
+                      <td style="font-family: monospace; font-size: 11px; color: var(--gray-500);">DET240307002</td>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary);">
+                        <a href="#" style="color: var(--primary);">RET20240307001</a>
+                      </td>
+                      <td>AI输入法</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13700137007</a></td>
+                      <td style="font-size: 11px; color: var(--gray-500); white-space: nowrap;">AI输入法_U13700137007</td>
+                      <td style="font-family: monospace; font-size: 12px; white-space: nowrap;">ORD20240210004</td>
+                      <td><span class="type-tag type-service" style="font-size: 11px;">支付成功</span></td>
+                      <td style="text-align: right; font-weight: 500;">¥98.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="text-align: right; font-weight: 600; color: var(--danger);">¥98.00</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-02-10 10:15</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="color: var(--gray-400); font-size: 12px;">-</td>
+                      <td style="text-align: center;"><span style="color: var(--danger); font-size: 12px;">✅ 是</span></td>
+                      <td style="font-size: 12px; color: var(--gray-600);">效果不好</td>
+                      <td style="text-align: center;"><span style="color: var(--secondary); font-size: 12px;">✅ 是</span></td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td style="font-size: 12px; color: var(--gray-400);">-</td>
+                    </tr>
+                    <!-- 不纳入挽留的订单 -->
+                    <tr>
+                      <td style="font-family: monospace; font-size: 11px; color: var(--gray-500);">DET240307003</td>
+                      <td style="font-family: monospace; font-size: 12px; color: var(--primary);">
+                        <a href="#" style="color: var(--primary);">RET20240307001</a>
+                      </td>
+                      <td>AI输入法</td>
+                      <td><a href="#" onclick="showPage('user-360')" style="color: var(--primary); font-size: 12px;">U13700137007</a></td>
+                      <td style="font-size: 11px; color: var(--gray-500); white-space: nowrap;">AI输入法_U13700137007</td>
+                      <td style="font-family: monospace; font-size: 12px; white-space: nowrap;">ORD20240115005</td>
+                      <td><span style="background: var(--secondary-light); color: var(--secondary); font-size: 11px; padding: 2px 8px; border-radius: 10px;">退款成功</span></td>
+                      <td style="text-align: right; font-weight: 500;">¥98.00</td>
+                      <td style="text-align: right; color: var(--danger);">¥98.00</td>
+                      <td style="text-align: right; color: var(--gray-400);">¥0.00</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-01-15 08:10</td>
+                      <td style="font-size: 12px; color: var(--gray-600); white-space: nowrap;">2024-01-20 14:30</td>
+                      <td style="font-size: 12px; color: var(--gray-600);">系统</td>
+                      <td style="font-size: 12px; color: var(--gray-600);">支付宝</td>
+                      <td style="text-align: center;"><span style="color: var(--danger); font-size: 12px;">✅ 是</span></td>
+                      <td style="font-size: 12px; color: var(--gray-600);">误购</td>
+                      <td style="text-align: center;"><span style="color: var(--gray-400); font-size: 12px;">❌ 否</span></td>
+                      <td style="text-align: center; color: var(--gray-400);">-</td>
+                      <td style="font-size: 12px; color: var(--warning);">已全额退款，不纳入挽留</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- 汇总信息 -->
+              <div style="margin-top: 16px; padding: 12px 16px; background: var(--gray-50); border-radius: var(--radius-md); display: flex; gap: 24px; font-size: 13px;">
+                <span>共 <strong>5</strong> 条订单记录</span>
+                <span>支付总金额：<strong style="color: var(--primary);">¥532.00</strong></span>
+                <span>退款总金额：<strong style="color: var(--danger);">¥187.00</strong></span>
+                <span>挽留总金额：<strong style="color: var(--danger);">¥345.00</strong></span>
+                <span>纳入挽留：<strong>4</strong> 笔</span>
+              </div>
+
+              <!-- 分页 -->
+              <div class="pagination">
+                <button class="page-btn" disabled>上一页</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">下一页</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
   
+  <!-- 挽留审核弹窗 -->
+  <div class="modal-overlay" id="audit-modal" style="display:none;">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="audit-modal-title">审核挽留申请</h3>
+        <button class="modal-close" onclick="closeModal('audit-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <!-- 挽留基本信息 -->
+        <div style="background: var(--gray-50); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 16px; font-size: 13px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div><span style="color: var(--gray-500);">挽留ID：</span><span id="audit-ret-id" style="font-family: monospace; color: var(--primary); font-weight: 500;"></span></div>
+            <div><span style="color: var(--gray-500);">挽留类型：</span><span id="audit-ret-type" style="font-weight: 500;"></span></div>
+            <div><span style="color: var(--gray-500);">应用名称：</span><span id="audit-ret-app" style="font-weight: 500;"></span></div>
+            <div><span style="color: var(--gray-500);">挽留金额：</span><span id="audit-ret-amount" style="font-weight: 600; color: var(--danger);"></span></div>
+          </div>
+        </div>
+
+        <!-- 审核操作：通过 -->
+        <div id="audit-approve-section">
+          <div style="background: #f6ffed; border: 1px solid #b7eb8f; border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">✅</span>
+            <span style="color: var(--secondary); font-weight: 500;">确认通过该挽留申请</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">审核意见（选填）</label>
+            <textarea class="form-input" rows="3" placeholder="填写审核通过意见..." style="resize: vertical;"></textarea>
+          </div>
+        </div>
+
+        <!-- 审核操作：驳回 -->
+        <div id="audit-reject-section" style="display: none;">
+          <div style="background: #fff5f5; border: 1px solid #ffc1c1; border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">❌</span>
+            <span style="color: var(--danger); font-weight: 500;">确认驳回该挽留申请</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">驳回原因分类 <span style="color: var(--danger);">*</span></label>
+            <select class="form-input" id="audit-reject-category" required>
+              <option value="">请选择驳回原因</option>
+              <option value="material">材料不足</option>
+              <option value="order">订单不满足</option>
+              <option value="evidence">证据不足</option>
+              <option value="other">其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">审核意见 <span style="color: var(--danger);">*</span></label>
+            <textarea class="form-input" id="audit-reject-reason" rows="3" placeholder="请填写驳回原因（必填）..." style="resize: vertical;" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">是否允许重新提交</label>
+            <div style="display: flex; gap: 16px; margin-top: 4px;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="radio" name="can-resubmit" value="yes" checked> <span>允许重新提交</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="radio" name="can-resubmit" value="no"> <span>不允许重新提交</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid var(--gray-200);">
+        <button class="btn btn-outline" onclick="closeModal('audit-modal')">取消</button>
+        <button class="btn btn-primary" id="audit-submit-btn" onclick="submitAudit()">确认提交</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 搜索订单模态框 -->
   <div class="modal-overlay" id="order-search">
     <div class="modal" style="max-width: 800px;">
@@ -4525,7 +5508,7 @@
                 <tr>
                   <td style="padding: 10px 12px;"><input type="radio" name="selectedOrder" value="ORD202403010001"></td>
                   <td style="padding: 10px 12px;"><span class="table-id">ORD202403010001</span></td>
-                  <td style="padding: 10px 12px;">138****8001</td>
+                  <td style="padding: 10px 12px;">13812348001</td>
                   <td style="padding: 10px 12px; font-weight: 600;">¥299.00</td>
                   <td style="padding: 10px 12px;"><span class="status-tag status-success">已完成</span></td>
                   <td style="padding: 10px 12px;">2024-03-01 10:30</td>
@@ -4533,7 +5516,7 @@
                 <tr>
                   <td style="padding: 10px 12px;"><input type="radio" name="selectedOrder" value="ORD202403020002"></td>
                   <td style="padding: 10px 12px;"><span class="table-id">ORD202403020002</span></td>
-                  <td style="padding: 10px 12px;">138****8001</td>
+                  <td style="padding: 10px 12px;">13812348001</td>
                   <td style="padding: 10px 12px; font-weight: 600;">¥599.00</td>
                   <td style="padding: 10px 12px;"><span class="status-tag status-warning">待发货</span></td>
                   <td style="padding: 10px 12px;">2024-03-02 14:20</td>
@@ -4541,7 +5524,7 @@
                 <tr>
                   <td style="padding: 10px 12px;"><input type="radio" name="selectedOrder" value="ORD202403050003"></td>
                   <td style="padding: 10px 12px;"><span class="table-id">ORD202403050003</span></td>
-                  <td style="padding: 10px 12px;">139****9002</td>
+                  <td style="padding: 10px 12px;">13912349002</td>
                   <td style="padding: 10px 12px; font-weight: 600;">¥1,299.00</td>
                   <td style="padding: 10px 12px;"><span class="status-tag status-success">已完成</span></td>
                   <td style="padding: 10px 12px;">2024-03-05 09:15</td>
@@ -4668,6 +5651,310 @@
     </div>
   </div>
   
+  <!-- 删除账号二次确认弹窗 -->
+  <div class="modal-overlay" id="delete-account-modal">
+    <div class="modal" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: var(--danger);">⚠️ 删除账号确认</h3>
+        <button class="modal-close" onclick="closeModal('delete-account-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; padding: 20px 0;">
+          <div style="font-size: 48px; margin-bottom: 16px;">🗑️</div>
+          <p style="font-size: 16px; color: var(--gray-700); margin-bottom: 8px;">确定要删除以下账号吗？</p>
+          <p id="delete-account-name" style="font-size: 18px; font-weight: 600; color: var(--danger); margin-bottom: 16px;"></p>
+          <div style="background: var(--danger-light); border-left: 4px solid var(--danger); padding: 12px 16px; text-align: left; border-radius: var(--radius-sm);">
+            <p style="font-size: 13px; color: var(--danger); margin: 0;"><strong>警告：</strong>删除后该账号的所有信息将被永久移除，无法恢复！</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('delete-account-modal')">取消</button>
+        <button class="btn btn-primary" style="background: var(--danger);" onclick="executeDeleteAccount()">确认删除</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 删除角色二次确认弹窗 -->
+  <div class="modal-overlay" id="delete-role-modal">
+    <div class="modal" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: var(--danger);">⚠️ 删除角色确认</h3>
+        <button class="modal-close" onclick="closeModal('delete-role-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; padding: 20px 0;">
+          <div style="font-size: 48px; margin-bottom: 16px;">🗑️</div>
+          <p style="font-size: 16px; color: var(--gray-700); margin-bottom: 8px;">确定要删除以下角色吗？</p>
+          <p id="delete-role-name" style="font-size: 18px; font-weight: 600; color: var(--danger); margin-bottom: 16px;"></p>
+          <div style="background: var(--danger-light); border-left: 4px solid var(--danger); padding: 12px 16px; text-align: left; border-radius: var(--radius-sm);">
+            <p style="font-size: 13px; color: var(--danger); margin: 0;"><strong>警告：</strong>删除后该角色的所有信息将被永久移除，关联账号将失去该角色权限！</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('delete-role-modal')">取消</button>
+        <button class="btn btn-primary" style="background: var(--danger);" onclick="executeDeleteRole()">确认删除</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 新建账号弹窗 -->
+  <div class="modal-overlay" id="create-account-modal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">新建账号</h3>
+        <button class="modal-close" onclick="closeModal('create-account-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label-required">用户名</label>
+            <input type="text" class="form-input" id="new-account-username" placeholder="请输入用户名">
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label-required">昵称</label>
+            <input type="text" class="form-input" id="new-account-nickname" placeholder="请输入昵称">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label-required">密码</label>
+            <input type="password" class="form-input" id="new-account-password" placeholder="请输入密码">
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label-required">确认密码</label>
+            <input type="password" class="form-input" id="new-account-password-confirm" placeholder="请再次输入密码">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label-required">角色</label>
+            <select class="form-select" id="new-account-role">
+              <option value="">请选择角色</option>
+              <option value="admin">系统管理员</option>
+              <option value="supervisor">客服主管</option>
+              <option value="cs">客服专员</option>
+              <option value="finance">财务专员</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">状态</label>
+            <select class="form-select" id="new-account-status">
+              <option value="active" selected>活跃</option>
+              <option value="inactive">禁用</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">关联400席位</label>
+            <input type="text" class="form-input" id="new-account-400seat" placeholder="如：400-001">
+          </div>
+          <div class="form-group">
+            <label class="form-label">所属客服分组</label>
+            <select class="form-select" id="new-account-group">
+              <option value="A" selected>分组A</option>
+              <option value="B">分组B</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('create-account-modal')">取消</button>
+        <button class="btn btn-primary" onclick="saveNewAccount()">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑账号弹窗 -->
+  <div class="modal-overlay" id="edit-account-modal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">编辑账号</h3>
+        <button class="modal-close" onclick="closeModal('edit-account-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-account-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">用户名</label>
+            <input type="text" class="form-input" id="edit-account-username" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label-required">昵称</label>
+            <input type="text" class="form-input" id="edit-account-nickname">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label-required">角色</label>
+            <select class="form-select" id="edit-account-role">
+              <option value="admin">系统管理员</option>
+              <option value="supervisor">客服主管</option>
+              <option value="cs">客服专员</option>
+              <option value="finance">财务专员</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">状态</label>
+            <select class="form-select" id="edit-account-status">
+              <option value="active">活跃</option>
+              <option value="inactive">禁用</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">关联400席位</label>
+            <input type="text" class="form-input" id="edit-account-400seat" placeholder="如：400-001">
+          </div>
+          <div class="form-group">
+            <label class="form-label">所属客服分组</label>
+            <select class="form-select" id="edit-account-group">
+              <option value="A">分组A</option>
+              <option value="B">分组B</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('edit-account-modal')">取消</button>
+        <button class="btn btn-primary" onclick="saveAccountEdit()">保存</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 新建角色弹窗 -->
+  <div class="modal-overlay" id="create-role-modal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">新建角色</h3>
+        <button class="modal-close" onclick="closeModal('create-role-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label-required">名称</label>
+            <input type="text" class="form-input" id="new-role-name" placeholder="如：客服专员">
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label-required">角色名称</label>
+            <input type="text" class="form-input" id="new-role-display-name" placeholder="如：客服专员">
+          </div>
+        </div>
+        <div style="margin-top: 16px; padding: 16px; background: var(--gray-50); border-radius: var(--radius-md);">
+          <p style="font-size: 13px; color: var(--gray-600); margin: 0;">💡 提示：新建角色后，请通过"权限"按钮为该角色配置具体的菜单权限。</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('create-role-modal')">取消</button>
+        <button class="btn btn-primary" onclick="saveNewRole()">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑角色弹窗 -->
+  <div class="modal-overlay" id="edit-role-modal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">编辑角色</h3>
+        <button class="modal-close" onclick="closeModal('edit-role-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-role-id">
+        <div class="form-group">
+          <label class="form-label">角色ID</label>
+          <input type="text" class="form-input" id="edit-role-id-display" readonly>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label-required">名称</label>
+            <input type="text" class="form-input" id="edit-role-name">
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label-required">角色名称</label>
+            <input type="text" class="form-input" id="edit-role-display-name">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('edit-role-modal')">取消</button>
+        <button class="btn btn-primary" onclick="saveRoleEdit()">保存</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 角色权限配置弹窗 -->
+  <div class="modal-overlay" id="role-permissions-modal">
+    <div class="modal" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3 class="modal-title">权限配置</h3>
+        <button class="modal-close" onclick="closeModal('role-permissions-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 20px; padding: 12px 16px; background: var(--primary-light); border-radius: var(--radius-md);">
+          <span style="font-size: 14px; color: var(--gray-600);">当前角色：</span>
+          <span style="font-size: 14px; font-weight: 600; color: var(--primary);">系统管理员</span>
+        </div>
+        <div style="max-height: 400px; overflow-y: auto;">
+          <div style="margin-bottom: 16px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: var(--gray-700); cursor: pointer;">
+              <input type="checkbox" checked> 系统管理
+            </label>
+            <div style="margin-left: 24px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); cursor: pointer;">
+                <input type="checkbox" checked> 账号管理
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); cursor: pointer;">
+                <input type="checkbox" checked> 角色管理
+              </label>
+            </div>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: var(--gray-700); cursor: pointer;">
+              <input type="checkbox" checked> 售后处理
+            </label>
+            <div style="margin-left: 24px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); cursor: pointer;">
+                <input type="checkbox" checked> 投诉处理
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); cursor: pointer;">
+                <input type="checkbox" checked> 退款申请
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); cursor: pointer;">
+                <input type="checkbox" checked> 自动退款
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); cursor: pointer;">
+                <input type="checkbox" checked> 订单/用户查询
+              </label>
+            </div>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: var(--gray-700); cursor: pointer;">
+              <input type="checkbox" checked> 数据报表
+            </label>
+            <div style="margin-left: 24px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); cursor: pointer;">
+                <input type="checkbox" checked> 数据看板
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); cursor: pointer;">
+                <input type="checkbox" checked> 渠道分析
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); cursor: pointer;">
+                <input type="checkbox" checked> 绩效统计
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('role-permissions-modal')">取消</button>
+        <button class="btn btn-primary" onclick="saveRolePermissions()">保存权限</button>
+      </div>
+    </div>
+  </div>
+  
   <script>
     // 页面切换
     function showPage(pageId) {
@@ -4675,16 +5962,25 @@
       document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
       });
-      
+
       // 显示目标页面
       document.getElementById(pageId).classList.add('active');
-      
+
       // 更新导航激活状态
       document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
       });
-      event.target.closest('.nav-item')?.classList.add('active');
-      
+      if (event && event.target) {
+        event.target.closest('.nav-item')?.classList.add('active');
+      }
+
+      // 如果是投诉详情页，检测订单退款状态
+      if (pageId === 'complaint-detail') {
+        setTimeout(() => {
+          checkOrderRefundStatus();
+        }, 100);
+      }
+
       // 更新页面标题
       const titles = {
         // 系统管理
@@ -4696,7 +5992,9 @@
         'refund-list': '退款申请表',
         'auto-refund': '自动退款表',
         'order-query': '订单/用户查询',
+        'retention-submit': '挽留提交表',
         'retention-audit': '挽留审核列表',
+        'retention-order-detail': '订单明细表',
         // 数据报表
         'dashboard': '数据看板',
         'channel-analysis': '渠道分析',
@@ -4709,6 +6007,7 @@
     function openModal(modalId) {
       const modal = document.getElementById(modalId);
       if (modal) {
+        modal.style.display = '';
         modal.classList.add('active');
       }
     }
@@ -4723,6 +6022,278 @@
     // 导出数据
     function exportData() {
       alert('导出功能演示：正在生成Excel文件...');
+    }
+    
+    // ========== 账号管理功能 ==========
+    let currentDeleteAccountId = null;
+    let currentDeleteAccountName = null;
+    
+    // 打开删除账号确认弹窗
+    function confirmDeleteAccount(accountId, accountName) {
+      currentDeleteAccountId = accountId;
+      currentDeleteAccountName = accountName;
+      document.getElementById('delete-account-name').textContent = accountId + ' - ' + accountName;
+      openModal('delete-account-modal');
+    }
+    
+    // 执行删除账号
+    function executeDeleteAccount() {
+      if (currentDeleteAccountId) {
+        alert('账号 ' + currentDeleteAccountId + ' 已删除');
+        closeModal('delete-account-modal');
+        currentDeleteAccountId = null;
+        currentDeleteAccountName = null;
+      }
+    }
+    
+    // 禁用账号
+    function disableAccount(accountId) {
+      alert('账号 ' + accountId + ' 已禁用，该账号将无法登录');
+    }
+    
+    // 启用账号
+    function enableAccount(accountId) {
+      alert('账号 ' + accountId + ' 已启用');
+    }
+    
+    // 打开编辑账号弹窗
+    function openEditAccountModal(accountId, username, nickname, role, status, seat400, group) {
+      document.getElementById('edit-account-id').value = accountId;
+      document.getElementById('edit-account-username').value = username;
+      document.getElementById('edit-account-nickname').value = nickname;
+      document.getElementById('edit-account-role').value = role;
+      document.getElementById('edit-account-status').value = status;
+      document.getElementById('edit-account-400seat').value = seat400 || '';
+      document.getElementById('edit-account-group').value = group || 'A';
+      openModal('edit-account-modal');
+    }
+
+    // 保存新建账号
+    function saveNewAccount() {
+      const username = document.getElementById('new-account-username').value.trim();
+      const nickname = document.getElementById('new-account-nickname').value.trim();
+      const password = document.getElementById('new-account-password').value;
+      const passwordConfirm = document.getElementById('new-account-password-confirm').value;
+      const role = document.getElementById('new-account-role').value;
+      
+      if (!username) {
+        alert('请输入用户名');
+        return;
+      }
+      if (!nickname) {
+        alert('请输入昵称');
+        return;
+      }
+      if (!password) {
+        alert('请输入密码');
+        return;
+      }
+      if (password !== passwordConfirm) {
+        alert('两次输入的密码不一致');
+        return;
+      }
+      if (!role) {
+        alert('请选择角色');
+        return;
+      }
+      
+      alert('账号 ' + username + ' 创建成功');
+      closeModal('create-account-modal');
+      // 清空表单
+      document.getElementById('new-account-username').value = '';
+      document.getElementById('new-account-nickname').value = '';
+      document.getElementById('new-account-password').value = '';
+      document.getElementById('new-account-password-confirm').value = '';
+      document.getElementById('new-account-role').value = '';
+    }
+
+    // 保存账号编辑
+    function saveAccountEdit() {
+      const accountId = document.getElementById('edit-account-id').value;
+      const nickname = document.getElementById('edit-account-nickname').value.trim();
+      
+      if (!nickname) {
+        alert('请输入昵称');
+        return;
+      }
+      
+      alert('账号 ' + accountId + ' 信息已保存');
+      closeModal('edit-account-modal');
+    }
+    
+    // 账号批量操作
+    document.addEventListener('DOMContentLoaded', function() {
+      const selectAllHeader = document.getElementById('selectAllHeader');
+      const selectAllAccounts = document.getElementById('selectAllAccounts');
+      const accountCheckboxes = document.querySelectorAll('.account-checkbox');
+      const selectedCount = document.getElementById('selectedCount');
+      
+      if (selectAllHeader) {
+        selectAllHeader.addEventListener('change', function() {
+          accountCheckboxes.forEach(cb => cb.checked = this.checked);
+          updateSelectedCount();
+        });
+      }
+      
+      if (selectAllAccounts) {
+        selectAllAccounts.addEventListener('change', function() {
+          accountCheckboxes.forEach(cb => cb.checked = this.checked);
+          selectAllHeader.checked = this.checked;
+          updateSelectedCount();
+        });
+      }
+      
+      accountCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+      });
+      
+      function updateSelectedCount() {
+        const checked = document.querySelectorAll('.account-checkbox:checked').length;
+        if (selectedCount) selectedCount.textContent = checked;
+      }
+    });
+    
+    // 批量禁用账号
+    function batchDisableAccounts() {
+      const checked = document.querySelectorAll('.account-checkbox:checked');
+      if (checked.length === 0) {
+        alert('请先选择要禁用的账号');
+        return;
+      }
+      alert('已批量禁用 ' + checked.length + ' 个账号');
+    }
+    
+    // 批量删除账号
+    function batchDeleteAccounts() {
+      const checked = document.querySelectorAll('.account-checkbox:checked');
+      if (checked.length === 0) {
+        alert('请先选择要删除的账号');
+        return;
+      }
+      if (confirm('确定要删除选中的 ' + checked.length + ' 个账号吗？此操作不可恢复！')) {
+        alert('已批量删除 ' + checked.length + ' 个账号');
+      }
+    }
+    
+    // ========== 角色管理功能 ==========
+    let currentDeleteRoleId = null;
+    let currentDeleteRoleName = null;
+    
+    // 打开删除角色确认弹窗
+    function confirmDeleteRole(roleId, roleName) {
+      currentDeleteRoleId = roleId;
+      currentDeleteRoleName = roleName;
+      document.getElementById('delete-role-name').textContent = roleId + ' - ' + roleName;
+      openModal('delete-role-modal');
+    }
+    
+    // 执行删除角色
+    function executeDeleteRole() {
+      if (currentDeleteRoleId) {
+        alert('角色 ' + currentDeleteRoleId + ' 已删除');
+        closeModal('delete-role-modal');
+        currentDeleteRoleId = null;
+        currentDeleteRoleName = null;
+      }
+    }
+    
+    // 打开编辑角色弹窗
+    function openEditRoleModal(roleId, name, displayName) {
+      document.getElementById('edit-role-id').value = roleId;
+      document.getElementById('edit-role-id-display').value = roleId;
+      document.getElementById('edit-role-name').value = name;
+      document.getElementById('edit-role-display-name').value = displayName;
+      openModal('edit-role-modal');
+    }
+
+    // 保存新建角色
+    function saveNewRole() {
+      const name = document.getElementById('new-role-name').value.trim();
+      const displayName = document.getElementById('new-role-display-name').value.trim();
+      
+      if (!name) {
+        alert('请输入名称');
+        return;
+      }
+      if (!displayName) {
+        alert('请输入角色名称');
+        return;
+      }
+      
+      alert('角色 ' + name + ' 创建成功');
+      closeModal('create-role-modal');
+      // 清空表单
+      document.getElementById('new-role-name').value = '';
+      document.getElementById('new-role-display-name').value = '';
+    }
+
+    // 保存角色编辑
+    function saveRoleEdit() {
+      const roleId = document.getElementById('edit-role-id').value;
+      const name = document.getElementById('edit-role-name').value.trim();
+      const displayName = document.getElementById('edit-role-display-name').value.trim();
+      
+      if (!name) {
+        alert('请输入名称');
+        return;
+      }
+      if (!displayName) {
+        alert('请输入角色名称');
+        return;
+      }
+      
+      alert('角色 ' + roleId + ' 信息已保存');
+      closeModal('edit-role-modal');
+    }
+    
+    // 保存角色权限
+    function saveRolePermissions() {
+      alert('角色权限已保存');
+      closeModal('role-permissions-modal');
+    }
+    
+    // 角色批量操作
+    document.addEventListener('DOMContentLoaded', function() {
+      const selectAllRoleHeader = document.getElementById('selectAllRoleHeader');
+      const selectAllRoles = document.getElementById('selectAllRoles');
+      const roleCheckboxes = document.querySelectorAll('.role-checkbox');
+      const selectedRoleCount = document.getElementById('selectedRoleCount');
+      
+      if (selectAllRoleHeader) {
+        selectAllRoleHeader.addEventListener('change', function() {
+          roleCheckboxes.forEach(cb => cb.checked = this.checked);
+          updateRoleSelectedCount();
+        });
+      }
+      
+      if (selectAllRoles) {
+        selectAllRoles.addEventListener('change', function() {
+          roleCheckboxes.forEach(cb => cb.checked = this.checked);
+          selectAllRoleHeader.checked = this.checked;
+          updateRoleSelectedCount();
+        });
+      }
+      
+      roleCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateRoleSelectedCount);
+      });
+      
+      function updateRoleSelectedCount() {
+        const checked = document.querySelectorAll('.role-checkbox:checked').length;
+        if (selectedRoleCount) selectedRoleCount.textContent = checked;
+      }
+    });
+    
+    // 批量删除角色
+    function batchDeleteRoles() {
+      const checked = document.querySelectorAll('.role-checkbox:checked');
+      if (checked.length === 0) {
+        alert('请先选择要删除的角色');
+        return;
+      }
+      if (confirm('确定要删除选中的 ' + checked.length + ' 个角色吗？关联账号将失去该角色权限！')) {
+        alert('已批量删除 ' + checked.length + ' 个角色');
+      }
     }
 
     // 投诉完结
@@ -4780,13 +6351,13 @@
       const resultGroup = document.getElementById('contact-result-group');
       const callOptions = document.getElementById('contact-result-call');
       const onlineOptions = document.getElementById('contact-result-online');
-      
+
       resultGroup.style.display = 'block';
-      
+
       // 重置沟通结果选项
       document.querySelectorAll('input[name="contact-result"]').forEach(r => r.checked = false);
       document.getElementById('contact-result-error').style.display = 'none';
-      
+
       if (value === 'phone400' || value === 'outbound') {
         callOptions.style.display = 'flex';
         onlineOptions.style.display = 'none';
@@ -4795,7 +6366,50 @@
         onlineOptions.style.display = 'flex';
       }
     }
-    
+
+    // 投诉列表Tab切换
+    function switchComplaintTab(tab) {
+      // 更新Tab样式
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`.tab-btn[data-tab="${tab}"]`)?.classList.add('active');
+
+      // 获取所有表格行
+      const rows = document.querySelectorAll('#complaintTable tbody tr');
+
+      rows.forEach(row => {
+        if (tab === 'all') {
+          row.style.display = '';
+        } else {
+          const channelCell = row.querySelector('td:nth-child(5)'); // 投诉渠道列
+          if (channelCell) {
+            const channelText = channelCell.textContent.trim();
+            let shouldShow = false;
+
+            if (tab === 'alipay') {
+              shouldShow = channelText.includes('支付宝');
+            } else if (tab === 'miniapp') {
+              shouldShow = channelText.includes('小程序');
+            } else if (tab === 'wechat') {
+              shouldShow = channelText.includes('微信');
+            }
+
+            row.style.display = shouldShow ? '' : 'none';
+          }
+        }
+      });
+
+      // 显示提示
+      const tabNames = {
+        'all': '全部',
+        'alipay': '支付宝',
+        'miniapp': '小程序',
+        'wechat': '微信'
+      };
+      showToast(`已切换到${tabNames[tab]}投诉列表`, 'info');
+    }
+
     // 挽留状态变更（保留函数避免其他引用报错，内部不执行任何操作）
     function handleRetentionStatusChange(value) {}
     
@@ -4817,6 +6431,40 @@
         }
         html += '</div>';
         container.innerHTML = html;
+      }
+    }
+    
+    // 检测订单退款状态（页面加载时调用）
+    function checkOrderRefundStatus() {
+      // 获取关联订单表格中的所有退款金额单元格
+      const orderRows = document.querySelectorAll('#complaint-detail .data-table tbody tr');
+      let hasRefundedOrder = false;
+      
+      orderRows.forEach(row => {
+        const refundCell = row.querySelector('td:nth-child(6)'); // 实际退款金额列
+        if (refundCell) {
+          const refundText = refundCell.textContent.trim();
+          // 如果退款金额不为空且不为"-"，说明有退款
+          if (refundText && refundText !== '-' && refundText.startsWith('¥')) {
+            hasRefundedOrder = true;
+          }
+        }
+      });
+      
+      // 如果检测到退款，显示提示并自动标记已解决
+      if (hasRefundedOrder) {
+        const alertBox = document.getElementById('refund-detect-alert');
+        if (alertBox) {
+          alertBox.style.display = 'block';
+        }
+        
+        // 自动选中"已解决"
+        const resolvedRadio = document.querySelector('input[name="handle-result"][value="resolved"]');
+        if (resolvedRadio) {
+          resolvedRadio.checked = true;
+          // 触发change事件以更新UI
+          handleResultChange('resolved');
+        }
       }
     }
     
@@ -4921,25 +6569,200 @@
       timeline.insertBefore(newItem, timeline.firstChild);
     }
     
-    // 挽留审核操作
-    function approveRetention(id) {
-      if (confirm('确定通过该挽留申请吗？')) {
-        alert('审核通过！挽留成功生效。');
+    // ========== 挽留提交表相关逻辑 ==========
+
+    // 模拟当前挽留记录数据（退款金额、录音状态等）
+    const retentionSubmitData = {
+      'RET20240308003': { refundAmt: 0, hasRecording: true,  app: 'XX出行', userId: 'U13800138005' },
+      'RET20240308004': { refundAmt: 0, hasRecording: false, app: 'YY健康', userId: 'U13900139006' },
+      'RET20240307003': { refundAmt: 89, hasRecording: true, app: 'XX出行', userId: 'U13700137007' },
+      'RET20240306001': { refundAmt: 120, hasRecording: false,app: 'XX出行', userId: 'U13600136008' },
+    };
+
+    // 打开补充材料弹窗
+    // hasRecording: true=有录音(非强制) false=无录音(强制)
+    function openSupplementModal(retentionId, hasRecording) {
+      const data = retentionSubmitData[retentionId] || {};
+      
+      // 填入基本信息
+      const el = (id) => document.getElementById(id);
+      el('supp-retention-id').textContent = retentionId;
+      el('supp-app-name').textContent = data.app || '-';
+      el('supp-user-id').textContent = data.userId || '-';
+
+      // 切换提示区域
+      el('supp-no-recording-tip').style.display = hasRecording ? 'none' : 'block';
+      el('supp-has-recording-tip').style.display = hasRecording ? 'block' : 'none';
+
+      // 必填标记
+      const required = !hasRecording;
+      el('supp-required-mark').style.display = required ? 'inline' : 'none';
+      el('supp-upload-required-mark').style.display = required ? 'inline' : 'none';
+
+      // 记录当前操作的 retentionId
+      el('supplement-modal').setAttribute('data-retention-id', retentionId);
+      el('supplement-modal').setAttribute('data-has-recording', hasRecording ? '1' : '0');
+
+      // 重置表单
+      el('supp-material-type').value = '';
+      el('supp-remark').value = '';
+      el('supp-file-list').innerHTML = '';
+      el('supp-material-type-error').style.display = 'none';
+      el('supp-upload-error').style.display = 'none';
+
+      openModal('supplement-modal');
+    }
+
+    // 处理补充材料文件上传
+    function handleSuppFileUpload(input) {
+      const list = document.getElementById('supp-file-list');
+      list.innerHTML = '';
+      Array.from(input.files).forEach(file => {
+        const item = document.createElement('div');
+        item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--gray-50);border-radius:var(--radius-sm);margin-bottom:6px;font-size:13px;';
+        item.innerHTML = `<span>📄</span><span style="flex:1;">${file.name}</span><span style="color:var(--gray-400);">${(file.size/1024).toFixed(0)} KB</span>`;
+        list.appendChild(item);
+      });
+    }
+
+    // 提交补充材料弹窗
+    function submitSupplementModal() {
+      const modal = document.getElementById('supplement-modal');
+      const hasRecording = modal.getAttribute('data-has-recording') === '1';
+      const retentionId = modal.getAttribute('data-retention-id');
+      const el = (id) => document.getElementById(id);
+
+      let valid = true;
+
+      // 无录音时强制验证
+      if (!hasRecording) {
+        if (!el('supp-material-type').value) {
+          el('supp-material-type-error').style.display = 'block';
+          valid = false;
+        } else {
+          el('supp-material-type-error').style.display = 'none';
+        }
+        const fileInput = document.getElementById('supp-file-input');
+        if (!fileInput.files || fileInput.files.length === 0) {
+          el('supp-upload-error').style.display = 'block';
+          valid = false;
+        } else {
+          el('supp-upload-error').style.display = 'none';
+        }
+      }
+
+      if (!valid) return;
+
+      closeModal('supplement-modal');
+      showToast(`挽留 ${retentionId} 已提交审核，等待审核人员处理`, 'success');
+
+      // 模拟更新行状态
+      setTimeout(() => {
+        const rows = document.querySelectorAll('#retention-submit .data-table tbody tr');
+        rows.forEach(row => {
+          if (row.textContent.includes(retentionId)) {
+            const statusCells = row.querySelectorAll('td');
+            // 第11列（提交状态）
+            if (statusCells[10]) {
+              statusCells[10].innerHTML = '<span class="status-tag status-resolved">已提交</span>';
+            }
+            // 补充材料列按钮变为已上传
+            if (statusCells[8]) {
+              statusCells[8].innerHTML = '<span style="color:var(--secondary);font-size:12px;">✅ 已上传</span>';
+            }
+          }
+        });
+      }, 300);
+    }
+
+    // 查看挽留提交详情
+    function showRetentionSubmitDetail(id) {
+      showToast(`查看挽留提交详情：${id}`, 'info');
+    }
+
+    // 打开审核弹窗（action: 'approve' | 'reject'）
+    const auditDataMap = {
+      'RET20240308001': { type: '全额未退挽留', app: 'AI输入法', amount: '¥168.00' },
+      'RET20240308002': { type: '全额未退挽留', app: '绘唱相机', amount: '¥98.00' },
+      'RET20240307001': { type: '部分退款挽留', app: 'AI输入法', amount: '¥271.00' },
+      'RET20240307002': { type: '全额未退挽留', app: 'XX出行', amount: '¥59.00' },
+    };
+    let _currentAuditAction = 'approve';
+
+    function openAuditModal(retentionId, action) {
+      _currentAuditAction = action;
+      const data = auditDataMap[retentionId] || { type: '-', app: '-', amount: '-' };
+
+      document.getElementById('audit-modal-title').textContent = action === 'approve' ? '✅ 审核通过' : '❌ 审核驳回';
+      document.getElementById('audit-ret-id').textContent = retentionId;
+      document.getElementById('audit-ret-type').textContent = data.type;
+      document.getElementById('audit-ret-app').textContent = data.app;
+      document.getElementById('audit-ret-amount').textContent = data.amount;
+      document.getElementById('audit-modal').setAttribute('data-ret-id', retentionId);
+
+      document.getElementById('audit-approve-section').style.display = action === 'approve' ? 'block' : 'none';
+      document.getElementById('audit-reject-section').style.display = action === 'reject' ? 'block' : 'none';
+
+      const btn = document.getElementById('audit-submit-btn');
+      btn.style.background = action === 'approve' ? 'var(--secondary)' : 'var(--danger)';
+      btn.textContent = action === 'approve' ? '确认通过' : '确认驳回';
+
+      document.getElementById('audit-modal').style.display = 'flex';
+    }
+
+    function submitAudit() {
+      const retentionId = document.getElementById('audit-modal').getAttribute('data-ret-id');
+      if (_currentAuditAction === 'reject') {
+        const category = document.getElementById('audit-reject-category').value;
+        const reason = document.getElementById('audit-reject-reason').value.trim();
+        if (!category) { showToast('请选择驳回原因分类', 'warning'); return; }
+        if (!reason)    { showToast('请填写审核意见', 'warning'); return; }
+        closeModal('audit-modal');
+        showToast(`已驳回 ${retentionId}：${reason}`, 'error');
+      } else {
+        closeModal('audit-modal');
+        showToast(`已通过 ${retentionId}，挽留成功生效`, 'success');
       }
     }
-    
-    function rejectRetention(id) {
-      const reason = prompt('请输入驳回原因：');
-      if (reason) {
-        alert('已驳回：' + reason);
-      }
-    }
-    
+
+    // 挽留审核操作（旧兼容）
+    function approveRetention(id) { openAuditModal(id, 'approve'); }
+    function rejectRetention(id)  { openAuditModal(id, 'reject'); }
+
     // 查看挽留详情
     function showRetentionDetail(id) {
-      alert('查看挽留详情：' + id);
+      openRetentionDetailPanel(id);
     }
-    
+
+    // 打开挽留详情面板
+    function openRetentionDetailPanel(id) {
+      showToast(`查看挽留详情：${id}`, 'info');
+    }
+
+    // 跳转到订单明细表（带挽留ID筛选）
+    // fromPage: 来源页面 id（用于面包屑返回）
+    let _orderDetailFromPage = 'retention-submit';
+    function openOrderDetailPage(retentionId, fromPage) {
+      _orderDetailFromPage = fromPage || 'retention-submit';
+      showPage('retention-order-detail');
+      const filterEl = document.getElementById('filter-retention-id');
+      if (filterEl) filterEl.value = retentionId;
+      // 更新面包屑
+      const breadcrumbSource = document.getElementById('order-detail-breadcrumb');
+      const breadcrumbId = document.getElementById('order-detail-breadcrumb-id');
+      const sourceLabels = {
+        'retention-submit': '挽留提交表',
+        'retention-audit': '挽留审核列表'
+      };
+      if (breadcrumbSource) breadcrumbSource.textContent = sourceLabels[_orderDetailFromPage] || '挽留提交表';
+      if (breadcrumbId) breadcrumbId.textContent = retentionId;
+    }
+    // 返回按钮点击处理（订单明细页面）
+    function goBackFromOrderDetail() {
+      showPage(_orderDetailFromPage || 'retention-submit');
+    }
+
+
     // 打开附件查看弹窗
     function openAttachmentModal(retentionId, count) {
       document.getElementById('attachment-retention-id').textContent = retentionId;
@@ -5024,7 +6847,7 @@
       const amount = document.getElementById('custom-refund-amount').value;
       const remark = document.getElementById('custom-refund-remark').value;
       
-      if (!amount || amount <= 0) {
+      if (!amount || amount < 0) {
         alert('请输入有效的退款金额');
         return;
       }
@@ -5039,7 +6862,7 @@
     
     // ========== 订单/用户查询功能 ==========
     
-    let currentQueryType = 'order';
+    let currentQueryType = 'phone';
     
     // 切换查询Tab
     function switchQueryTab(type) {
@@ -5195,13 +7018,13 @@
       let hasError = false;
       
       // 验证退款金额
-      if (!amount || amount <= 0) {
+      if (!amount || amount < 0) {
         document.getElementById('order-custom-refund-amount-error').style.display = 'block';
         hasError = true;
       } else {
         document.getElementById('order-custom-refund-amount-error').style.display = 'none';
       }
-      
+
       // 验证申请渠道
       if (!channel) {
         document.getElementById('order-custom-refund-channel-error').style.display = 'block';
