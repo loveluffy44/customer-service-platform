@@ -2272,41 +2272,41 @@
         
         <!-- 投诉列表页 -->
         <div class="page active" id="complaint-list">
+          <!-- 时间Tab -->
+          <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 16px;">
+            <button class="time-tab-btn active" data-time="today" onclick="switchTimeTab('today')" style="padding: 6px 16px; border: 1px solid var(--primary); background: var(--primary); color: white; font-size: 13px; border-radius: 4px; cursor: pointer;">今日</button>
+            <button class="time-tab-btn" data-time="yesterday" onclick="switchTimeTab('yesterday')" style="padding: 6px 16px; border: 1px solid var(--gray-300); background: white; color: var(--gray-600); font-size: 13px; border-radius: 4px; cursor: pointer;">昨日</button>
+            <button class="time-tab-btn" data-time="month" onclick="switchTimeTab('month')" style="padding: 6px 16px; border: 1px solid var(--gray-300); background: white; color: var(--gray-600); font-size: 13px; border-radius: 4px; cursor: pointer;">本月</button>
+          </div>
+          <style>
+            .time-tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+            .time-tab-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+          </style>
+
           <!-- 统计卡片 -->
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-value" style="display: flex; align-items: center; gap: 8px; font-size: 20px; color: #722ED1;">
-                <span>3.2%</span>
-                <span style="font-size: 12px; color: var(--gray-500); font-weight: normal;">
-                  <span style="color: #1677FF;">支付宝3.0%</span> / 
-                  <span style="color: #52C41A;">小程序3.5%</span> / 
-                  <span style="color: #FA8C16;">微信3.1%</span>
-                </span>
+              <div class="stat-value" style="font-size: 20px; color: #722ED1;">
+                <span>3.2‰</span>
               </div>
-              <div class="stat-label">周期扣款投诉率</div>
-              <div class="stat-trend">今日累计</div>
+              <div class="stat-label">今日实时投诉率</div>
+              <div class="stat-trend" style="color: #52C41A;">↓ 3.2% 较昨日</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" style="display: flex; align-items: center; gap: 8px; font-size: 20px;">
-                <span>42</span>
-                <span style="font-size: 12px; color: var(--gray-500); font-weight: normal;">
-                  <span style="color: #1677FF;">支付宝22</span> / 
-                  <span style="color: #52C41A;">小程序12</span> / 
-                  <span style="color: #FA8C16;">微信8</span>
-                </span>
+              <div class="stat-value" style="font-size: 20px;">
+                <span>3.5‰</span>
               </div>
-              <div class="stat-label">周期扣款投诉数</div>
-              <div class="stat-trend trend-up">↑ 8% 较昨日</div>
+              <div class="stat-label">近七日投诉率</div>
+              <div class="stat-trend" style="color: #F5222D;">↑ 8.5% 较上7天</div>
             </div>
             <div class="stat-card">
               <div class="stat-value" style="color: #13C2C2;">¥8,560</div>
               <div class="stat-label">挽留金额</div>
-              <div class="stat-trend">今日累计</div>
             </div>
             <div class="stat-card">
               <div class="stat-value" style="color: #FA8C16;">18.7%</div>
               <div class="stat-label">挽留率</div>
-              <div class="stat-trend">挽留金额/投诉金额</div>
+              <div class="stat-trend">挽留金额/订单原金额</div>
             </div>
           </div>
           
@@ -2330,8 +2330,8 @@
               </div>
             </div>
             <style>
-              .tab-btn:hover { color: var(--primary) !important; }
-              .tab-btn.active { color: var(--primary) !important; border-bottom-color: var(--primary) !important; font-weight: 500; }
+              #complaint-list .tab-btn:hover { color: var(--primary) !important; }
+              #complaint-list .tab-btn.active { color: var(--primary) !important; border-bottom-color: var(--primary) !important; font-weight: 500; }
             </style>
             <div class="card-body">
               <!-- 筛选栏 -->
@@ -2390,10 +2390,10 @@
                 <table class="data-table" id="complaintTable" style="min-width: 1500px;">
                   <thead>
                     <tr>
-                      <th class="sortable" data-sort="risk">风险等级</th>
                       <th class="sortable" data-sort="id">投诉单号</th>
                       <th class="sortable" data-sort="app">应用名称</th>
                       <th class="sortable" data-sort="merchant">商户名称</th>
+                      <th class="sortable" data-sort="risk">风险等级</th>
                       <th class="sortable" data-sort="orders">关联订单数</th>
                       <th class="sortable" data-sort="status">投诉状态</th>
                       <th class="sortable" data-sort="amount">投诉金额</th>
@@ -2409,10 +2409,10 @@
                   <tbody>
                   <!-- 高风险置顶工单（创建后30分钟内） -->
                   <tr class="pinned-row">
-                    <td><span class="risk-tag high">高风险</span></td>
                     <td><span class="pinned-icon">📌</span><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308005</a></td>
                     <td>XX出行</td>
                     <td>杭州CC网络科技有限公司</td>
+                    <td><span class="risk-tag high">高风险</span></td>
                     <td>3</td>
                     <td><span class="status-tag status-pending">待处理</span></td>
                     <td>¥1,299.00</td>
@@ -2427,10 +2427,10 @@
                     </td>
                   </tr>
                   <tr class="pinned-row">
-                    <td><span class="risk-tag high">高风险</span></td>
                     <td><span class="pinned-icon">📌</span><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308006</a></td>
                     <td>XX出行</td>
                     <td>南京DD科技有限公司</td>
+                    <td><span class="risk-tag high">高风险</span></td>
                     <td>2</td>
                     <td><span class="status-tag status-pending">待处理</span></td>
                     <td>¥899.00</td>
@@ -2446,10 +2446,10 @@
                   </tr>
                   <!-- 中风险工单 -->
                   <tr>
-                    <td><span class="risk-tag medium">中风险</span></td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308001</a></td>
                     <td>XX出行</td>
                     <td>北京XX科技有限公司</td>
+                    <td><span class="risk-tag medium">中风险</span></td>
                     <td>2</td>
                     <td><span class="status-tag status-pending">待处理</span></td>
                     <td>¥299.00</td>
@@ -2464,10 +2464,10 @@
                     </td>
                   </tr>
                   <tr>
-                    <td><span class="risk-tag medium">中风险</span></td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308002</a></td>
                     <td>XX出行</td>
                     <td>上海YY网络科技有限公司</td>
+                    <td><span class="risk-tag medium">中风险</span></td>
                     <td>1</td>
                     <td><span class="status-tag status-processing">处理中</span></td>
                     <td>¥159.00</td>
@@ -2482,10 +2482,10 @@
                     </td>
                   </tr>
                   <tr>
-                    <td><span class="risk-tag medium">中风险</span></td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240308003</a></td>
                     <td>XX出行</td>
                     <td>广州ZZ出行服务有限公司</td>
+                    <td><span class="risk-tag medium">中风险</span></td>
                     <td>1</td>
                     <td><span class="status-tag status-processing">处理中</span></td>
                     <td>¥599.00</td>
@@ -2500,10 +2500,10 @@
                     </td>
                   </tr>
                   <tr>
-                    <td><span class="risk-tag medium">中风险</span></td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307004</a></td>
                     <td>XX出行</td>
                     <td>深圳AA科技有限公司</td>
+                    <td><span class="risk-tag medium">中风险</span></td>
                     <td>1</td>
                     <td><span class="status-tag status-success">处理完成</span></td>
                     <td>¥89.00</td>
@@ -2518,10 +2518,10 @@
                     </td>
                   </tr>
                   <tr>
-                    <td>-</td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307005</a></td>
                     <td>XX出行</td>
                     <td>杭州BB信息技术有限公司</td>
+                    <td>-</td>
                     <td>2</td>
                     <td><span class="status-tag status-withdrawn">用户撤诉</span></td>
                     <td>¥399.00</td>
@@ -2536,10 +2536,10 @@
                     </td>
                   </tr>
                   <tr>
-                    <td>-</td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307006</a></td>
                     <td>XX出行</td>
                     <td>成都CC出行服务有限公司</td>
+                    <td>-</td>
                     <td>1</td>
                     <td><span class="status-tag status-pending">待处理</span></td>
                     <td>¥128.00</td>
@@ -2554,10 +2554,10 @@
                     </td>
                   </tr>
                   <tr>
-                    <td>-</td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240307007</a></td>
                     <td>XX出行</td>
                     <td>武汉DD网络科技有限公司</td>
+                    <td>-</td>
                     <td>1</td>
                     <td><span class="status-tag status-processing">处理中</span></td>
                     <td>¥256.00</td>
@@ -2572,10 +2572,10 @@
                     </td>
                   </tr>
                   <tr>
-                    <td>-</td>
                     <td><a href="#" class="table-id" onclick="showPage('complaint-detail')" style="text-decoration: none;">CP20240306008</a></td>
                     <td>XX出行</td>
                     <td>南京EE出行服务有限公司</td>
+                    <td>-</td>
                     <td>1</td>
                     <td><span class="status-tag status-success">处理完成</span></td>
                     <td>¥588.00</td>
@@ -5065,7 +5065,7 @@
                 <div class="user-avatar-large" style="width: 80px; height: 80px; font-size: 32px;">李</div>
                 <div style="flex: 1;">
                   <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">李客服</div>
-                  <div style="color: var(--gray-500); font-size: 14px;">高级客服专员</div>
+                  <div style="color: var(--gray-500); font-size: 14px;">高级客服专员 · A组</div>
                 </div>
               </div>
             </div>
@@ -5073,56 +5073,60 @@
           
           <!-- 统计看板 -->
           <div class="content-card">
-            <div class="card-header">
+            <div class="card-header" style="justify-content: flex-start; gap: 24px;">
               <div class="card-title">
                 <div class="card-title-icon">📊</div>
                 <span>工作统计</span>
               </div>
               <div style="display: flex; gap: 8px;">
-                <button class="tab-btn active" data-tab="today" onclick="switchAgentStatsTab('today')" style="padding: 6px 16px; border: none; background: var(--primary); color: white; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">今日</button>
+                <button class="tab-btn active" data-tab="today" onclick="switchAgentStatsTab('today')" style="padding: 6px 16px; border: none; background: #4F46E5; color: #FFFFFF; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">今日</button>
                 <button class="tab-btn" data-tab="week" onclick="switchAgentStatsTab('week')" style="padding: 6px 16px; border: none; background: var(--gray-100); color: var(--gray-600); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">本周</button>
                 <button class="tab-btn" data-tab="month" onclick="switchAgentStatsTab('month')" style="padding: 6px 16px; border: none; background: var(--gray-100); color: var(--gray-600); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;">本月</button>
               </div>
             </div>
             <div class="card-body">
-              <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
-                <div class="stat-card">
-                  <div class="stat-value" id="agent-stat-complaint" style="font-size: 24px; color: var(--primary);">23</div>
-                  <div class="stat-label">处理投诉</div>
-                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">
-                    <span style="color: #1677FF;">支付宝8</span> / 
-                    <span style="color: #52C41A;">小程序9</span> / 
-                    <span style="color: #FA8C16;">微信6</span>
+              <!-- 400统计 -->
+              <div style="margin-bottom: 24px;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--gray-200);">400</div>
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                  <div class="stat-card">
+                    <div class="stat-value" id="agent-stat-400-calls" style="font-size: 24px; color: var(--primary);">156</div>
+                    <div class="stat-label">400接听数量</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value" id="agent-stat-400-bad" style="font-size: 24px; color: var(--danger);">3</div>
+                    <div class="stat-label">差评数量</div>
                   </div>
                 </div>
-                <div class="stat-card">
-                  <div class="stat-value" id="agent-stat-refund" style="font-size: 24px; color: var(--danger);">¥12,580</div>
-                  <div class="stat-label">退款金额</div>
-                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">
-                    <span style="color: #1677FF;">支付宝¥5,200</span> / 
-                    <span style="color: #52C41A;">小程序¥4,380</span> / 
-                    <span style="color: #FA8C16;">微信¥3,000</span>
+              </div>
+              
+              <!-- 投诉处理统计 -->
+              <div style="margin-bottom: 24px;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--gray-200);">投诉处理</div>
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                  <div class="stat-card">
+                    <div class="stat-value" id="agent-stat-complaint" style="font-size: 24px; color: var(--primary);">23</div>
+                    <div class="stat-label">处理投诉数量</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value" id="agent-stat-escalated" style="font-size: 24px; color: #FA8C16;">3</div>
+                    <div class="stat-label">升级投诉</div>
                   </div>
                 </div>
-                <div class="stat-card">
-                  <div class="stat-value" id="agent-stat-retention" style="font-size: 24px; color: var(--secondary);">¥8,560</div>
-                  <div class="stat-label">挽留金额</div>
-                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">
-                    <span style="color: #1677FF;">支付宝¥3,500</span> / 
-                    <span style="color: #52C41A;">小程序¥3,060</span> / 
-                    <span style="color: #FA8C16;">微信¥2,000</span>
+              </div>
+              
+              <!-- 挽留情况统计 -->
+              <div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--gray-200);">挽留情况</div>
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                  <div class="stat-card">
+                    <div class="stat-value" id="agent-stat-retention" style="font-size: 24px; color: var(--secondary);">¥8,560</div>
+                    <div class="stat-label">挽留金额</div>
                   </div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-value" id="agent-stat-satisfaction" style="font-size: 24px; color: #52C41A;">98.5%</div>
-                  <div class="stat-label">400电话满意度</div>
-                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">较上月 +2.3%</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-value" id="agent-stat-escalated" style="font-size: 24px; color: #FA8C16;">3</div>
-                  <div class="stat-label">升级投诉数</div>
-                  <div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">用户对处理结果不满意二次投诉</div>
-                  <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">较上月 -1</div>
+                  <div class="stat-card">
+                    <div class="stat-value" id="agent-stat-retention-rate" style="font-size: 24px; color: #52C41A;">68.5%</div>
+                    <div class="stat-label">挽留率</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -6387,6 +6391,23 @@
         'wechat': '微信'
       };
       showToast(`已切换到${tabNames[tab]}投诉列表`, 'info');
+    }
+
+    // 投诉看板时间Tab切换
+    function switchTimeTab(time) {
+      // 更新Tab样式
+      document.querySelectorAll('.time-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`.time-tab-btn[data-time="${time}"]`)?.classList.add('active');
+
+      // 显示提示
+      const timeNames = {
+        'today': '今日',
+        'yesterday': '昨日',
+        'month': '本月'
+      };
+      showToast(`已切换到${timeNames[time]}数据`, 'info');
     }
 
     // 挽留状态变更（保留函数避免其他引用报错，内部不执行任何操作）
